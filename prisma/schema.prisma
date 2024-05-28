@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(uuid())
+  nik           String          @unique
+  email         String          @unique
+  name          String?
+  birthDate     DateTime?
+  phone         String?
+  is_active     Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Borrow        Borrow[]
+  Role          Role?           @relation(fields: [roleId], references: [id])
+  roleId        String?
+  User_Activity User_Activity[]
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roleId    String
+  Role      Role     @relation(fields: [roleId], references: [id])
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User[]
+  Admin     Admin[]
+}
+
+model Rack {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  is_active   Boolean  @default(true)
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Item        Item[]
+}
+
+model Item {
+  id           String       @id @default(uuid())
+  name         String
+  description  String?
+  rackId       String
+  categoryId   String
+  is_active    Boolean      @default(true)
+  views        Int          @default(0)
+  availability Availability @default(AVAILABLE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  rack         Rack         @relation(fields: [rackId], references: [id])
+  category     Category     @relation(fields: [categoryId], references: [id])
+  Borrow       Borrow[]
+  ItemImage    Item_Image[]
+  LostItem     Lost_Item[]
+}
+
+model Item_Image {
+  id        String   @id @default(uuid())
+  itemId    String
+  file_name String
+  file_url  String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Item      Item     @relation(fields: [itemId], references: [id])
+}
+
+model Lost_Item {
+  id        String   @id @default(uuid())
+  itemId    String
+  reason    String
+  createdAt DateTime @default(now())
+  createdBy String
+  updatedAt DateTime @updatedAt
+  Item      Item     @relation(fields: [itemId], references: [id])
+}
+
+enum Availability {
+  AVAILABLE
+  BORROWED
+  MAINTENANCE
+  LOST
+}
+
+model Borrow {
+  id           String            @id @default(uuid())
+  userId       String
+  itemId       String
+  borrowNumber String
+  borrowDate   DateTime
+  returnDate   DateTime
+  status       Status            @default(PENDING)
+  is_active    Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  User         User              @relation(fields: [userId], references: [id])
+  Item         Item              @relation(fields: [itemId], references: [id])
+  Return       Return_Evidence[]
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
+model Return_Evidence {
+  id        String   @id @default(uuid())
+  borrowId  String
+  file_name String
+  file_url  String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Borrow    Borrow   @relation(fields: [borrowId], references: [id])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Item      Item[]
+}
+
+model User_Activity {
+  id        String   @id @default(uuid())
+  userId    String
+  activity  String
+  device    String
+  ip        String
+  lng       Float
+  lat       Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+}

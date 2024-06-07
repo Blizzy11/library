@@ -67,6 +67,7 @@ model Item {
   description  String?
   rackId       String
   categoryId   String
+  imageCover   String?
   is_active    Boolean      @default(true)
   views        Int          @default(0)
   availability Availability @default(AVAILABLE)

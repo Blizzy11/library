@@ -12,9 +12,9 @@ export const LoginPage = () => {
   const handleLogin = async (e: any) => {
     e.preventDefault();
     const res = await axios.post("/api/v1/auth/login", {
-      nik: dataLogin.nik,
-      password: dataLogin.password,
+      ...dataLogin,
     });
+
     console.log(res.data);
   };
 

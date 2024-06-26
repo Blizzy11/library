@@ -48,21 +48,33 @@ export async function GET(request: Request) {
   const pageNumber = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
+  const id = searchParams.get("id");
 
   const offset = (pageNumber - 1) * pageSize;
+
+  // where condition
+  let whereClause: Record<string, any> = { is_active: true }; // Base where clause
+
+  if (searchTerm) {
+    whereClause.OR = [
+      { name: { contains: searchTerm, mode: "insensitive" } },
+      { description: { contains: searchTerm, mode: "insensitive" } },
+      { "rack.name": { contains: searchTerm, mode: "insensitive" } },
+      { "category.name": { contains: searchTerm, mode: "insensitive" } },
+    ];
+  }
+
+  if (id) {
+    whereClause = {
+      ...whereClause,
+      id: id,
+    };
+  }
 
   const booksQuery = prisma.item.findMany({
     skip: offset,
     take: pageSize,
-    where: {
-      is_active: true,
-      OR: [
-        { name: { contains: searchTerm } },
-        { description: { contains: searchTerm } },
-        { rack: { name: { contains: searchTerm } } },
-        { category: { name: { contains: searchTerm } } },
-      ],
-    },
+    where: whereClause,
     include: {
       rack: true,
       category: true,

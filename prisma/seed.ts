@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bycrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -35,7 +36,9 @@ const dataCategory = [
 async function main() {
   const user = await prisma.user.create({
     data: {
-      nik: "1234567890",
+      username: "admin",
+      password: bycrypt.hashSync("admin", 10),
+      nik: "13931222",
       name: "Admin",
       email: "haris@mail.com",
     },

@@ -13,19 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String          @id @default(uuid())
-  nik           String          @unique
+  username      String          @unique
+  nik           String?         @unique
   email         String          @unique
   name          String?
   birthDate     DateTime?
   phone         String?
+  password      String
   is_active     Boolean         @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   Borrow        Borrow[]
-  Role          Role?           @relation(fields: [roleId], references: [id])
-  roleId        String?
+  role          UserRole        @default(USER)
   User_Activity User_Activity[]
 }
 
@@ -46,7 +52,6 @@ model Role {
   is_active Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User[]
   Admin     Admin[]
 }
 
@@ -64,7 +69,7 @@ model Rack {
 model Item {
   id           String       @id @default(uuid())
   name         String
-  description  String?
+  description  String?      @db.LongText
   rackId       String
   categoryId   String
   imageCover   String?
@@ -113,8 +118,9 @@ model Borrow {
   userId       String
   itemId       String
   borrowNumber String
-  borrowDate   DateTime
-  returnDate   DateTime
+  description  String?           @db.LongText
+  borrowDate   DateTime          @db.Date
+  returnDate   DateTime          @db.Date
   status       Status            @default(PENDING)
   is_active    Boolean           @default(true)
   createdAt    DateTime          @default(now())

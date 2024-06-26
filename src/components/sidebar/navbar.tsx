@@ -1,9 +1,14 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 
-const Navbar = () => {
+interface NavbarProps {
+  role?: string;
+}
+
+const Navbar = ({ role }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Event handler untuk toggling menu
@@ -70,38 +75,90 @@ const Navbar = () => {
         <div className="">
           <h2 className="p-5 text-xl font-bold mb-5">Menu</h2>
           <ul className="space-y-4 menu">
-            <li>
-              <Link href={"/admin/dashboard"} className="text-gray-700">
-                Dashboard
-              </Link>
-            </li>
+            {role === "ADMIN" ? (
+              <>
+                <li>
+                  <Link href={"/admin/dashboard"} className="text-gray-700">
+                    Dashboard
+                  </Link>
+                </li>
+
+                <li>
+                  <details>
+                    <summary>Library</summary>
+                    <ul>
+                      <li>
+                        <Link href={"/admin/library/book"}>Collection</Link>
+                      </li>
+                      <li>
+                        <Link href={"/admin/library"}>Cattegory</Link>
+                      </li>
+                      <li>
+                        <Link href={"/admin/library"}>Rack</Link>
+                      </li>
+                    </ul>
+                  </details>
+                </li>
+
+                <li>
+                  <details>
+                    <summary>settings</summary>
+                    <ul>
+                      <li>
+                        <a>Profile</a>
+                      </li>
+                    </ul>
+                  </details>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link href={"/user/dashboard"} className="text-gray-700">
+                    Dashboard
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href={"/app/collection"} className="text-gray-700">
+                    Collection List
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href={"/app/transaction"} className="text-gray-700">
+                    Transaction
+                  </Link>
+                </li>
+
+                <li>
+                  <details>
+                    <summary>Settings</summary>
+                    <ul>
+                      <li>
+                        <a>Profile</a>
+                      </li>
+                      <li>
+                        <a>History</a>
+                      </li>
+                      <li>
+                        <a>Favorite Collection</a>
+                      </li>
+                    </ul>
+                  </details>
+                </li>
+              </>
+            )}
 
             <li>
-              <details>
-                <summary>Library</summary>
-                <ul>
-                  <li>
-                    <Link href={"/admin/library/book"}>Collection</Link>
-                  </li>
-                  <li>
-                    <Link href={"/admin/library"}>Authors</Link>
-                  </li>
-                </ul>
-              </details>
-            </li>
-
-            <li>
-              <details>
-                <summary>User</summary>
-                <ul>
-                  <li>
-                    <a>User</a>
-                  </li>
-                  <li>
-                    <a>User History</a>
-                  </li>
-                </ul>
-              </details>
+              <button
+                type="submit"
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                Sign out
+              </button>
             </li>
           </ul>
         </div>

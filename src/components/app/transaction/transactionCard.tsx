@@ -12,6 +12,8 @@ import { AiOutlineContainer } from "react-icons/ai";
 import { toast } from "sonner";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import CustomButton from "@/components/button/customButton";
+import ModalDetailTransaction from "@/components/modal/modalComponent/modalDetailTransaction";
+import { useRouter } from "next/navigation";
 
 dayjs.extend(advancedFormat);
 
@@ -20,11 +22,15 @@ const TransactionCard = () => {
   const isSession = useSession();
   const { data: session } = isSession;
 
+  // Router
+  const router = useRouter();
+
   // State
   const [data, setData] = useState<TransactionResponse>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true); // to track if there are more data to load
+  const [isOpen, setIsOpen] = useState(false);
 
   const getTransaction = async () => {
     // get transaction
@@ -53,7 +59,7 @@ const TransactionCard = () => {
           }
         })
         .catch((error) => {
-          toast.error(error.response.data.message);
+          toast.error(error.response.data.message || error.message);
         });
     } catch (error) {
       toast.error("Something went wrong");
@@ -77,10 +83,17 @@ const TransactionCard = () => {
             key={item.id}
           >
             <div className="flex flex-col justify-between p-3">
-              <div className="flex flex-row gap-4 items-center border-b border-black pb-2">
-                <AiOutlineContainer size={20} />
-                <div className="text-sm md:text-md lg:text-lg font-bold">
-                  {item.borrowNumber}
+              <div className="flex flex-row justify-between gap-4 items-center border-b border-black pb-2">
+                <div className="flex flex-row gap-2 items-center">
+                  <AiOutlineContainer size={20} />
+                  <div className="text-xs md:text-md lg:text-md">
+                    {item.borrowNumber}
+                  </div>
+                </div>
+                <div
+                  className={`border border-black rounded-md p-1 w-fit text-center text-xs md:text-sm lg:text-md`}
+                >
+                  {item.status}
                 </div>
               </div>
               <div className="flex flex-col gap-2">
@@ -91,12 +104,10 @@ const TransactionCard = () => {
                     dayjs(item.returnDate).format("dddd, DD MMMM YYYY")}
                 </div>
                 <div className="flex flex-row gap-2 text-xs self-end">
-                  <div className={`border border-black rounded-md p-1 w-fit`}>
-                    {item.status}
-                  </div>
                   <button
                     onClick={() => {
-                      toast.success(item.id);
+                      setIsOpen(true);
+                      router.push(`?transactionId=${item.id}`, undefined);
                     }}
                     className={`bg-black text-white rounded-md p-1 w-fit`}
                   >
@@ -108,7 +119,9 @@ const TransactionCard = () => {
           </div>
         ))
       ) : (
-        <div>No transaction found</div>
+        <div className={`flex justify-center p-5 items-center`}>
+          No transaction found
+        </div>
       )}
 
       {/* Load more button */}
@@ -124,6 +137,14 @@ const TransactionCard = () => {
           </CustomButton>
         </div>
       )}
+
+      <ModalDetailTransaction
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          // router.push("/app/transaction", undefined);
+        }}
+      />
     </div>
   );
 };

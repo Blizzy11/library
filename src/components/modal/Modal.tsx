@@ -60,7 +60,9 @@ const Modal = ({ children, modalTitle, isOpen, onClose }: ModalProps) => {
               ✕
             </button>
           </form>
-          <h3 className="font-bold text-black text-lg">{modalTitle}</h3>
+          <h3 className="font-bold text-black text-lg border-b border-black pb-2">
+            {modalTitle}
+          </h3>
           <div className="py-4">{children}</div>
           <div className="modal-action">
             <button className="btn" onClick={onClose}>

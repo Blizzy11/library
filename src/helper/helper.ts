@@ -17,3 +17,12 @@ export function thousandSeparator(number: number) {
 
   return formattedNumber;
 }
+
+// Utility function to truncate description
+export function truncateDescription(description: string, wordLimit: number) {
+  const words = description.split(" ");
+  if (words.length > wordLimit) {
+    return words.slice(0, wordLimit).join(" ") + " ....";
+  }
+  return description;
+}

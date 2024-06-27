@@ -105,6 +105,7 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
+  const borrowId = searchParams.get("borrowId");
   const pageNumber = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
@@ -117,6 +118,13 @@ export async function GET(request: Request) {
     whereClause = {
       ...whereClause,
       userId,
+    };
+  }
+
+  if (borrowId) {
+    whereClause = {
+      ...whereClause,
+      id: borrowId,
     };
   }
 

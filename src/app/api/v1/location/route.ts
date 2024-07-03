@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const searchTerm = searchParams.get("search") || "";
   const id = searchParams.get("id");
 
-  console.log({ id });
+  console.log({ pageNumber, pageSize, searchTerm, id });
 
   const offset = (pageNumber - 1) * pageSize;
 
@@ -20,19 +20,7 @@ export async function GET(request: Request) {
   let whereClause: Record<string, any> = { is_active: true }; // Base where clause
 
   if (searchTerm) {
-    let isActiveSearchTerm: boolean | null = null;
-
-    if (searchTerm.toLowerCase() === "active") {
-      isActiveSearchTerm = true;
-    } else if (searchTerm.toLowerCase() === "inactive") {
-      isActiveSearchTerm = false;
-    }
-
     whereClause.OR = [{ name: { contains: searchTerm } }];
-
-    if (isActiveSearchTerm !== null) {
-      whereClause.OR.push({ is_active: isActiveSearchTerm });
-    }
   }
 
   if (id) {
@@ -42,40 +30,40 @@ export async function GET(request: Request) {
     };
   }
 
-  const category = await prisma.category.findMany({
+  const location = await prisma.location.findMany({
     skip: offset,
     take: pageSize,
     where: whereClause,
   });
 
-  const totalCategory = await prisma.category.count({
+  const totalLocation = await prisma.location.count({
     where: { is_active: true },
   });
 
-  const totalPages = Math.ceil(totalCategory / pageSize);
+  const totalPages = Math.ceil(totalLocation / pageSize);
 
   return NextResponse.json({
     success: true,
-    message: "Rack fetched successfully",
-    data: category,
-    pagination: pagination(totalCategory, totalPages),
+    message: "Location fetched successfully",
+    data: location,
+    pagination: pagination(totalLocation, totalPages),
   });
 }
 
 export async function POST(request: Request) {
   const { name } = await request.json();
 
-  // check if rack name already exists in the same location
-  const categoryExists = await prisma.category.findFirst({
+  // check if location name already exists
+  const locationExists = await prisma.location.findFirst({
     where: {
       name,
     },
   });
-  if (categoryExists) {
+  if (locationExists) {
     return NextResponse.json(
       {
         success: false,
-        message: "Cateegory already exists",
+        message: "Location name already exists",
       },
       {
         status: 400,
@@ -83,17 +71,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const category = await prisma.category.create({
+  const location = await prisma.location.create({
     data: {
       name,
     },
   });
-  if (category) {
+  if (location) {
     return NextResponse.json(
       {
         success: true,
         message: "Rack added successfully",
-        data: category,
+        data: location,
       },
       {
         status: 200,
@@ -112,40 +100,22 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
-  const { name, id } = await request.json();
-  const { searchParams } = new URL(request.url);
-
-  console.log({ name, id });
-
-  // check if id exists
-  if (!id) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Id not found",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const category = await prisma.category.update({
-    where: {
-      id: +id,
-    },
+export async function DELETE(request: Request) {
+  const { id } = await request.json();
+  const location = await prisma.location.update({
     data: {
-      name,
+      is_active: false,
+    },
+    where: {
+      id: id,
     },
   });
-
-  if (category) {
+  if (location) {
     return NextResponse.json(
       {
         success: true,
-        message: "Category updated successfully",
-        data: category,
+        message: "Location deleted successfully",
+        data: location,
       },
       {
         status: 200,
@@ -155,7 +125,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Category not updated",
+        message: "Location not deleted",
       },
       {
         status: 400,
@@ -164,22 +134,25 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
-  const { id } = await request.json();
-  const category = await prisma.category.update({
+export async function PUT(request: Request) {
+  const { name } = await request.json();
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+
+  const location = await prisma.location.update({
     data: {
-      is_active: false,
+      name,
     },
     where: {
-      id: id,
+      id: Number(id),
     },
   });
-  if (category) {
+  if (location) {
     return NextResponse.json(
       {
         success: true,
-        message: "Category deleted successfully",
-        data: category,
+        message: "Location updated successfully",
+        data: location,
       },
       {
         status: 200,
@@ -189,7 +162,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Category not deleted",
+        message: "Location not updated",
       },
       {
         status: 400,

@@ -68,7 +68,7 @@ const Navbar = ({ role }: NavbarProps) => {
       </div>
 
       <div
-        className={`fixed top-0 right-0 z-50 w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-[999] w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -88,13 +88,18 @@ const Navbar = ({ role }: NavbarProps) => {
                     <summary>Library</summary>
                     <ul>
                       <li>
-                        <Link href={"/admin/library/book"}>Collection</Link>
+                        <Link href={"/admin/library/collection"}>
+                          Collection
+                        </Link>
                       </li>
                       <li>
-                        <Link href={"/admin/library"}>Cattegory</Link>
+                        <Link href={"/admin/library/category"}>Category</Link>
                       </li>
                       <li>
-                        <Link href={"/admin/library"}>Rack</Link>
+                        <Link href={"/admin/library/rack"}>Rack</Link>
+                      </li>
+                      <li>
+                        <Link href={"/admin/library/location"}>Location</Link>
                       </li>
                     </ul>
                   </details>
@@ -136,7 +141,12 @@ const Navbar = ({ role }: NavbarProps) => {
                     <summary>Settings</summary>
                     <ul>
                       <li>
-                        <a>Profile</a>
+                        <Link
+                          href={"/app/setting/profile"}
+                          className="text-gray-700"
+                        >
+                          Profile
+                        </Link>{" "}
                       </li>
                       <li>
                         <a>History</a>

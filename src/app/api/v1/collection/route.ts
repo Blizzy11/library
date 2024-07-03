@@ -9,12 +9,31 @@ export async function POST(request: Request) {
   const { name, description, rackId, categoryId, imageCover } =
     await request.json();
 
+  // Prevent if collection name already exists in rack and location
+  const collectionExists = await prisma.item.findFirst({
+    where: {
+      name,
+      rackId: +rackId,
+    },
+  });
+  if (collectionExists) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Collection name already exists in the same rack",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
   const book = await prisma.item.create({
     data: {
       name,
       description,
-      rackId,
-      categoryId,
+      rackId: +rackId,
+      categoryId: +categoryId,
       imageCover,
     },
   });
@@ -78,6 +97,9 @@ export async function GET(request: Request) {
     include: {
       rack: true,
       category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 

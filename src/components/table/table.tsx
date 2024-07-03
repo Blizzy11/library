@@ -3,21 +3,27 @@ import axios from "axios";
 import { use, useEffect, useState } from "react";
 import CustomSearch from "../search/customSearch";
 import CustomSelect from "../select/customSelect";
-import Paagination from "../pagination/pagination";
-import { FcEmptyTrash } from "react-icons/fc";
-import RainbowLoading from "../loading/rainbowLoading";
+import Pagination from "../pagination/pagination";
+import { toast } from "sonner";
+import CustomButton from "../button/customButton";
+import Modal from "../modal/Modal";
 
 interface TableProps {
   data?: any[];
   dataHeader: any[];
   url: string;
+  modalChildren?: React.ReactNode;
+  addTextButton?: string;
 }
 
 export default function Table(props: TableProps) {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [openModal, setOpenModal] = useState(false);
 
   const dataHeader = props.dataHeader;
   const option = [
@@ -28,10 +34,15 @@ export default function Table(props: TableProps) {
 
   // getData item
   const getData = async () => {
-    const res = await axios.get(
-      `${props.url}?page=${page}&limit=10&search=${searchTerm}`
-    );
-    setData(res.data.data);
+    await axios
+      .get(`${props.url}?page=${page}&limit=10&search=${searchTerm}`)
+      .then((res) => {
+        setData(res.data.data);
+        setTotalPage(res.data.pagination.totalPage);
+      })
+      .catch((err) => {
+        toast.error(err.response.data.message || "Something went wrong");
+      });
     setIsLoading(false);
   };
 
@@ -40,23 +51,6 @@ export default function Table(props: TableProps) {
     getData();
   }, [searchTerm, page]);
 
-  // const handleSearch = (value: string) => {
-  //   const filteredData = data.filter((item) => {
-  //     // Leverage dataHeader for dynamic filtering
-  //     return dataHeader.some((header) => {
-  //       const key = header.key;
-  //       // Handle nested key structures (e.g., item.rack.name)
-  //       const itemValue = key
-  //         .split(".")
-  //         .reduce((acc: any, current: any) => acc[current], item);
-  //       return (
-  //         itemValue && itemValue.toLowerCase().includes(value.toLowerCase())
-  //       );
-  //     });
-  //   });
-  //   setData(filteredData);
-  // };
-
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setPage(1); // Reset to first page on new search
@@ -64,6 +58,22 @@ export default function Table(props: TableProps) {
 
   return (
     <div className={"flex flex-col gap-5"}>
+      {props.modalChildren && (
+        <div>
+          <CustomButton
+            type="button"
+            text={props.addTextButton}
+            classname="py-2 px-3"
+            onClick={() => setOpenModal(true)}
+          />
+          <Modal
+            isOpen={openModal}
+            onClose={() => setOpenModal(false)}
+            modalTitle={props.addTextButton || "Add"}
+            children={props.modalChildren}
+          />
+        </div>
+      )}
       <div className={"flex flex-row-reverse justify-between"}>
         <div>
           <CustomSearch placeholder="Search..." onChange={handleSearch} />
@@ -84,17 +94,18 @@ export default function Table(props: TableProps) {
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="border border-black">
             {isLoading ? (
-              <tr>
+              <tr className="border-b border-black">
                 <td colSpan={dataHeader.length + 2} className="text-center">
                   <span className="loading loading-infinity loading-lg"></span>
                 </td>
               </tr>
             ) : data.length > 0 ? (
               data.map((item, index) => {
+                console.log(item);
                 return (
-                  <tr key={index}>
+                  <tr key={index} className={`border-b border-black`}>
                     <th>{index + 1}</th>
                     {dataHeader.map((column, columnIndex) => {
                       return (
@@ -133,7 +144,7 @@ export default function Table(props: TableProps) {
                 );
               })
             ) : (
-              <tr>
+              <tr className="border-b border-black">
                 <td colSpan={dataHeader.length + 2} className="text-center">
                   No Data
                 </td>
@@ -144,7 +155,7 @@ export default function Table(props: TableProps) {
       </div>
       <div className={"flex flex-row-reverse"}>
         <div>
-          <Paagination page={page} setPage={setPage} totalPage={data.length} />
+          <Pagination page={page} setPage={setPage} totalPage={totalPage} />
         </div>
       </div>
     </div>

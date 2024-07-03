@@ -35,34 +35,35 @@ model User {
   User_Activity User_Activity[]
 }
 
-model Admin {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String
-  is_active Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  roleId    String
-  Role      Role     @relation(fields: [roleId], references: [id])
-}
+// model Admin {
+//   id        String   @id @default(uuid())
+//   username  String   @unique
+//   password  String
+//   is_active Boolean  @default(true)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   roleId    String
+//   Role      Role     @relation(fields: [roleId], references: [id])
+// }
 
 model Role {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   name      String
   is_active Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Admin     Admin[]
+  // Admin     Admin[]
 }
 
 model Rack {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   is_active   Boolean  @default(true)
-  location    String
+  locationId  Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  location    Location @relation(fields: [locationId], references: [id])
   Item        Item[]
 }
 
@@ -70,8 +71,8 @@ model Item {
   id           String       @id @default(uuid())
   name         String
   description  String?      @db.LongText
-  rackId       String
-  categoryId   String
+  rackId       Int
+  categoryId   Int
   imageCover   String?
   is_active    Boolean      @default(true)
   views        Int          @default(0)
@@ -123,6 +124,9 @@ model Borrow {
   returnDate   DateTime          @db.Date
   status       Status            @default(PENDING)
   is_active    Boolean           @default(true)
+  approvedBy   String?
+  approvedAt   DateTime?
+  returnAt     DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   User         User              @relation(fields: [userId], references: [id])
@@ -149,12 +153,21 @@ model Return_Evidence {
 }
 
 model Category {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   name      String
   is_active Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Item      Item[]
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  is_active Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Rack      Rack[]
 }
 
 model User_Activity {

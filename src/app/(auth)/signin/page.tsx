@@ -13,11 +13,6 @@ export const LoginPage = () => {
     password: Yup.string().required("Password is required"),
   });
 
-  // const [dataLogin, setDataLogin] = useState({
-  //   username: "",
-  //   password: "",
-  // });
-
   const handleLogin = async (value: any) => {
     // e.preventDefault();
 
@@ -106,7 +101,7 @@ export const LoginPage = () => {
                 ) : null}
               </div>
               <CustomButton
-                classname="w-full"
+                classname="w-full py-2"
                 type="submit"
                 disabled={isSubmitting}
               >

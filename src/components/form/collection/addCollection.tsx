@@ -1,6 +1,8 @@
 "use client";
 import CustomButton from "@/components/button/customButton";
 import RainbowLoading from "@/components/loading/rainbowLoading";
+import { GetCategoryResponseArray } from "@/types/category";
+import { GetRackResponseArray } from "@/types/rack";
 import axios from "axios";
 import { Field, Formik } from "formik";
 import { useRouter } from "next/navigation";
@@ -10,8 +12,8 @@ import * as Yup from "yup";
 
 const AddCollectionForm = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [category, setcategory] = useState([]);
-  const [rack, setrack] = useState([]);
+  const [category, setcategory] = useState<GetCategoryResponseArray>([]);
+  const [rack, setrack] = useState<GetRackResponseArray>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
@@ -32,7 +34,7 @@ const AddCollectionForm = () => {
     try {
       const res = axios.get("/api/v1/category");
       const { data } = await res;
-      setcategory(data);
+      setcategory(data.data);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -46,7 +48,7 @@ const AddCollectionForm = () => {
     try {
       const res = axios.get("/api/v1/rack");
       const { data } = await res;
-      setrack(data);
+      setrack(data.data);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -59,7 +61,7 @@ const AddCollectionForm = () => {
     getRack();
   }, []);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: any, action: any) => {
     const data = {
       name: values.name,
       description: values.description,
@@ -68,15 +70,22 @@ const AddCollectionForm = () => {
       imageCover: values.imageCover,
     };
     try {
-      const response = await axios.post("/api/v1/collection", data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      return response;
+      await axios
+        .post("/api/v1/collection", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          toast.success(res.data.message);
+          action.resetForm();
+          router.refresh();
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message || error.message);
+        });
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong");
     }
   };
 
@@ -96,22 +105,11 @@ const AddCollectionForm = () => {
           imageCover: null,
         }}
         validationSchema={formValidation}
-        onSubmit={(values, { setSubmitting }) => {
+        onSubmit={(values, action) => {
           values.imageCover = (file?.name as any) || null;
           // console.log(values);
-          handleSubmit(values)
-            .then((res) => {
-              toast.success(res?.data.message);
-            })
-            .catch((error) => {
-              toast.error("Error adding collection");
-            })
-            .finally(() => {
-              setSubmitting(false);
-            });
-
-          // reset form after submitting uing formik
-          router.refresh();
+          handleSubmit(values, action);
+          action.setSubmitting(false);
         }}
       >
         {({
@@ -191,13 +189,13 @@ const AddCollectionForm = () => {
                   <option value={""} className="text-white">
                     Select Rack
                   </option>
-                  {rack?.map((item: any) => (
+                  {rack?.map((item) => (
                     <option
                       key={item.id}
                       value={item.id}
                       className="text-white"
                     >
-                      {item.name}
+                      {`${item.name} - ${item.location.name}`}
                     </option>
                   ))}
                 </Field>
@@ -263,17 +261,31 @@ const AddCollectionForm = () => {
                 )}
               </div>
             </div>
-            <div>
+            <div className="flex gap-4">
               <CustomButton
                 disabled={isSubmitting}
                 type="submit"
-                bgColor="black"
-                color="white"
+                classname="py-2 px-3"
               >
                 {isSubmitting ? (
                   <span className="loading loading-dots loading-sm"></span>
                 ) : (
                   "Submit"
+                )}
+              </CustomButton>
+
+              <CustomButton
+                disabled={isSubmitting}
+                type="button"
+                classname="py-2 px-3"
+                onClick={() => {
+                  router.back();
+                }}
+              >
+                {isSubmitting ? (
+                  <span className="loading loading-dots loading-sm"></span>
+                ) : (
+                  "Back"
                 )}
               </CustomButton>
             </div>

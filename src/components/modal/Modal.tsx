@@ -8,9 +8,16 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   modalTitle: string;
+  buttonCloseActive?: boolean;
 }
 
-const Modal = ({ children, modalTitle, isOpen, onClose }: ModalProps) => {
+const Modal = ({
+  children,
+  modalTitle,
+  isOpen,
+  onClose,
+  buttonCloseActive = true,
+}: ModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   // Handle ESC key press to close modal
@@ -64,11 +71,13 @@ const Modal = ({ children, modalTitle, isOpen, onClose }: ModalProps) => {
             {modalTitle}
           </h3>
           <div className="py-4">{children}</div>
-          <div className="modal-action">
-            <button className="btn" onClick={onClose}>
-              Close
-            </button>
-          </div>
+          {buttonCloseActive && (
+            <div className="modal-action">
+              <button className="btn" onClick={onClose}>
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </dialog>
     </div>

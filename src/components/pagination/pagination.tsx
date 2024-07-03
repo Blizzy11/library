@@ -7,11 +7,7 @@ interface PaginationProps {
   onClick?: (page: number) => void;
 }
 
-const Paagination = ({
-  page = 1,
-  setPage,
-  totalPage = 10,
-}: PaginationProps) => {
+const Pagination = ({ page = 1, setPage, totalPage = 10 }: PaginationProps) => {
   const renderPaginationButtons = (currentPage: number, totalPages: number) => {
     const maxButtons = 5;
     const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
@@ -47,4 +43,4 @@ const Paagination = ({
   );
 };
 
-export default Paagination;
+export default Pagination;

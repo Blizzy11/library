@@ -7,6 +7,7 @@ import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 import Link from "next/link";
 import React from "react";
+import { AiOutlinePlus } from "react-icons/ai";
 
 const prisma = new PrismaClient();
 
@@ -31,10 +32,6 @@ const dataHeader = [
     label: "Name",
   },
   {
-    key: "description",
-    label: "Description",
-  },
-  {
     key: "rack.name",
     label: "Rack",
   },
@@ -52,8 +49,12 @@ const BookPage = async () => {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Link href="/admin/library/book/addCollection">
-          <CustomButton type="button" text="Add Collection" />
+        <Link href="/admin/library/collection/addCollection">
+          <CustomButton type="button" classname="py-2 px-3">
+            <div className="flex gap-2 items-center">
+              Add Collection <AiOutlinePlus />
+            </div>
+          </CustomButton>
         </Link>
       </div>
       <Table dataHeader={dataHeader} url="/api/v1/collection" />

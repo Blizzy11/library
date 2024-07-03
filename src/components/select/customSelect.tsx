@@ -45,7 +45,10 @@ const CustomSelect = ({ data, onChange }: CustomSelectProps) => {
     <div>
       <div
         className="dropdown"
-        style={{ position: "relative", display: "inline-block" }}
+        style={{
+          position: "relative",
+          display: "inline-block",
+        }}
       >
         <summary
           role="button"

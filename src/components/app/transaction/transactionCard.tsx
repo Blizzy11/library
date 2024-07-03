@@ -14,6 +14,7 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import CustomButton from "@/components/button/customButton";
 import ModalDetailTransaction from "@/components/modal/modalComponent/modalDetailTransaction";
 import { useRouter } from "next/navigation";
+import ModalReturnFormCollection from "@/components/modal/modalComponent/modalReturnCollection";
 
 dayjs.extend(advancedFormat);
 
@@ -31,6 +32,7 @@ const TransactionCard = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true); // to track if there are more data to load
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenReturn, setIsOpenReturn] = useState(false);
 
   const getTransaction = async () => {
     // get transaction
@@ -104,6 +106,17 @@ const TransactionCard = () => {
                     dayjs(item.returnDate).format("dddd, DD MMMM YYYY")}
                 </div>
                 <div className="flex flex-row gap-2 text-xs self-end">
+                  {item.status === "APPROVED" && (
+                    <button
+                      className={`bg-black text-white rounded-md p-1 w-fit`}
+                      onClick={() => {
+                        setIsOpenReturn(true);
+                        router.push(`?transactionId=${item.id}`, undefined);
+                      }}
+                    >
+                      Return Collection
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setIsOpen(true);
@@ -111,7 +124,7 @@ const TransactionCard = () => {
                     }}
                     className={`bg-black text-white rounded-md p-1 w-fit`}
                   >
-                    Lihat Detail
+                    See Detail
                   </button>
                 </div>
               </div>
@@ -143,6 +156,13 @@ const TransactionCard = () => {
         onClose={() => {
           setIsOpen(false);
           // router.push("/app/transaction", undefined);
+        }}
+      />
+
+      <ModalReturnFormCollection
+        isOpen={isOpenReturn}
+        onClose={() => {
+          setIsOpenReturn(false);
         }}
       />
     </div>

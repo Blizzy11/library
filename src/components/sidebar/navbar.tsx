@@ -68,7 +68,7 @@ const Navbar = ({ role }: NavbarProps) => {
       </div>
 
       <div
-        className={`fixed top-0 right-0 z-[999] w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-50 w-1/2 h-full bg-white shadow-lg transform transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -80,6 +80,18 @@ const Navbar = ({ role }: NavbarProps) => {
                 <li>
                   <Link href={"/admin/dashboard"} className="text-gray-700">
                     Dashboard
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href={"/admin/transaction"} className="text-gray-700">
+                    Transaction
+                  </Link>
+                </li>
+
+                <li>
+                  <Link href={"/admin/user"} className="text-gray-700">
+                    User List
                   </Link>
                 </li>
 
@@ -110,7 +122,7 @@ const Navbar = ({ role }: NavbarProps) => {
                     <summary>settings</summary>
                     <ul>
                       <li>
-                        <a>Profile</a>
+                        <Link href={"/admin/setting/profile"}>Profile</Link>
                       </li>
                     </ul>
                   </details>

@@ -109,6 +109,7 @@ export async function GET(request: Request) {
   const pageNumber = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
+  const status = searchParams.get("status") || "";
 
   const offset = (pageNumber - 1) * pageSize;
 
@@ -128,6 +129,30 @@ export async function GET(request: Request) {
     };
   }
 
+  if (status && status !== "ALL") {
+    whereClause = {
+      ...whereClause,
+      status,
+    };
+  }
+
+  if (searchTerm) {
+    whereClause = {
+      ...whereClause,
+      OR: [
+        { borrowNumber: { contains: searchTerm } },
+        { description: { contains: searchTerm } },
+        {
+          item: {
+            name: {
+              contains: searchTerm,
+            },
+          },
+        },
+      ],
+    };
+  }
+
   const borrow = await prisma.borrow.findMany({
     skip: offset,
     take: pageSize,
@@ -136,8 +161,8 @@ export async function GET(request: Request) {
       createdAt: "desc",
     },
     include: {
-      Item: true,
-      User: true,
+      item: true,
+      user: true,
     },
   });
 

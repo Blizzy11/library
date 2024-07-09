@@ -15,7 +15,7 @@ export default async function UserLayout({
       <div className="flex">
         <Sidebar />
         <div></div>
-        <div className="flex-1 p-5 md:p-10 lg:p-10 sm:ml-64 mt-20">
+        <div className="flex-1 p-5 md:p-10 lg:p-10 sm:ml-64 mt-20 overflow-x-hidden">
           {children}
         </div>
       </div>

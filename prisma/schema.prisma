@@ -21,10 +21,9 @@ enum UserRole {
 model User {
   id            String          @id @default(uuid())
   username      String          @unique
-  nik           String?         @unique
   email         String          @unique
   name          String?
-  birthDate     DateTime?
+  birthDate     DateTime?       @db.Date
   phone         String?
   password      String
   is_active     Boolean         @default(true)
@@ -129,8 +128,8 @@ model Borrow {
   returnAt     DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
-  User         User              @relation(fields: [userId], references: [id])
-  Item         Item              @relation(fields: [itemId], references: [id])
+  user         User              @relation(fields: [userId], references: [id])
+  item         Item              @relation(fields: [itemId], references: [id])
   Return       Return_Evidence[]
 }
 
@@ -139,6 +138,7 @@ enum Status {
   APPROVED
   REJECTED
   RETURNED
+  CACNCELED
 }
 
 model Return_Evidence {

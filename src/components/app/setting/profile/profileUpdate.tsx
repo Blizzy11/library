@@ -2,7 +2,10 @@
 
 import CustomButton from "@/components/button/customButton";
 import { GetUserProfileResponse } from "@/types/user";
+import { LocalizationProvider, MobileDatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import axios from "axios";
+import dayjs from "dayjs";
 import { Form, Formik } from "formik";
 import React, { useState } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
@@ -21,6 +24,7 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
     email: data.email || "",
     name: data.name || "",
     phone_number: data.phone || "",
+    birthDate: data.birthDate ? dayjs(data.birthDate).format() : "", // Format as string
   });
 
   const phoneRegExp =
@@ -39,6 +43,7 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
 
   const handleSubmitUpdate = async (values: any) => {
     setIsloading(true);
+    console.log(values);
     try {
       await axios
         .put("/api/v1/user", values, {
@@ -69,174 +74,207 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
       values.username !== initialValues.username ||
       values.email !== initialValues.email ||
       values.name !== initialValues.name ||
-      values.phone_number !== initialValues.phone_number
+      values.phone_number !== initialValues.phone_number ||
+      values.birthDate !== initialValues.birthDate
     );
   };
 
   return (
-    <div
-      className={`border border-black p-5 flex flex-col justify-center items-center mt-5`}
-    >
-      <p className={`font-bold text-lg md:text-xl lg:text-2xl`}>Profile</p>
-      <Formik
-        initialValues={initialValues}
-        validateOnChange={true}
-        validationSchema={validationSchema}
-        onSubmit={async (values, action) => {
-          if (isValuesChanged(values)) {
-            handleSubmitUpdate(values);
-          } else {
-            toast.error("No changes made");
-          }
-
-          refetch();
-          action.setSubmitting(false);
-        }}
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <div
+        className={`border border-black p-5 flex flex-col justify-center items-center mt-5`}
       >
-        {({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-        }) => (
-          <Form className={`flex flex-col gap-3 w-full`}>
-            <div className="mb-4">
-              <label
-                htmlFor="NIK"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                onChange={(e) => {
-                  // Remove spaces from the value
-                  const valueWithoutSpaces = e.target.value.replace(/\s+/g, "");
-                  handleChange({
-                    ...e,
-                    target: {
-                      ...e.target,
-                      value: valueWithoutSpaces,
-                      name: "username",
-                    },
-                  });
-                }}
-                onBlur={handleBlur}
-                value={values.username ?? ""}
-                autoComplete="off"
-                className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
-              />
-              {errors.username && touched.username ? (
-                <div className="text-red-500">{errors.username}</div>
-              ) : null}
-            </div>
+        <p className={`font-bold text-lg md:text-xl lg:text-2xl`}>Profile</p>
+        <Formik
+          enableReinitialize
+          initialValues={initialValues}
+          validateOnChange={true}
+          validationSchema={validationSchema}
+          onSubmit={async (values, action) => {
+            if (isValuesChanged(values)) {
+              handleSubmitUpdate(values);
+            } else {
+              toast.error("No changes made");
+            }
 
-            <div className="mb-4">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                onChange={handleChange}
-                onBlur={handleBlur}
-                value={values.name ?? ""}
-                autoComplete="off"
-                className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
-              />
-              {errors.name && touched.name ? (
-                <div className="text-red-500">{errors.name}</div>
-              ) : null}
-            </div>
-
-            <div className="relative mb-4 -z-50">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <div className="relative">
+            refetch();
+            action.setSubmitting(false);
+          }}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            isSubmitting,
+          }) => (
+            <Form className={`flex flex-col gap-3 w-full`}>
+              <div className="mb-4">
+                <label
+                  htmlFor="NIK"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Username
+                </label>
                 <input
                   type="text"
-                  id="email"
-                  name="email"
-                  onChange={handleChange}
+                  id="username"
+                  name="username"
+                  onChange={(e) => {
+                    // Remove spaces from the value
+                    const valueWithoutSpaces = e.target.value.replace(
+                      /\s+/g,
+                      ""
+                    );
+                    handleChange({
+                      ...e,
+                      target: {
+                        ...e.target,
+                        value: valueWithoutSpaces,
+                        name: "username",
+                      },
+                    });
+                  }}
                   onBlur={handleBlur}
-                  value={values.email}
+                  value={values.username ?? ""}
                   autoComplete="off"
                   className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
                 />
-                {/* {isEmailVerified && ( */}
-                <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500">
-                  <AiFillCheckCircle size={20} />
-                </span>
-                {/* )} */}
+                {errors.username && touched.username ? (
+                  <div className="text-red-500">{errors.username}</div>
+                ) : null}
               </div>
-              {errors.email && touched.email ? (
-                <div className="text-red-500">{errors.email}</div>
-              ) : null}
-            </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="phone_number"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="text"
-                id="phone_number"
-                name="phone_number"
-                onChange={(e) => {
-                  // only number
-                  const value = e.target.value.replace(/[^0-9]/g, "");
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.name ?? ""}
+                  autoComplete="off"
+                  className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
+                />
+                {errors.name && touched.name ? (
+                  <div className="text-red-500">{errors.name}</div>
+                ) : null}
+              </div>
 
-                  handleChange({
-                    ...e,
-                    target: {
-                      ...e.target,
-                      value,
-                      name: e.target.name,
-                    },
-                  });
-                }}
-                onBlur={handleBlur}
-                value={values.phone_number ?? ""}
-                autoComplete="off"
-                className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
-              />
-              {errors.phone_number && touched.phone_number ? (
-                <div className="text-red-500">{errors.phone_number}</div>
-              ) : null}
-            </div>
+              <div className="relative mb-4 bg-transparent">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.email}
+                    autoComplete="off"
+                    className="mt-1 block bg-transparent w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
+                  />
+                  {/* {isEmailVerified && ( */}
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500">
+                    <AiFillCheckCircle size={20} />
+                  </span>
+                  {/* )} */}
+                </div>
+                {errors.email && touched.email ? (
+                  <div className="text-red-500">{errors.email}</div>
+                ) : null}
+              </div>
 
-            <div className={``}>
-              <CustomButton
-                disabled={isSubmitting}
-                type="submit"
-                classname="px-3 py-2 w-full"
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-dots loading-sm"></span>
-                ) : (
-                  "Update"
-                )}
-              </CustomButton>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="phone_number"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  id="phone_number"
+                  name="phone_number"
+                  onChange={(e) => {
+                    // only number
+                    const value = e.target.value.replace(/[^0-9]/g, "");
+
+                    handleChange({
+                      ...e,
+                      target: {
+                        ...e.target,
+                        value,
+                        name: e.target.name,
+                      },
+                    });
+                  }}
+                  onBlur={handleBlur}
+                  value={values.phone_number ?? ""}
+                  autoComplete="off"
+                  className="mt-1 block w-full bg-white px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
+                />
+                {errors.phone_number && touched.phone_number ? (
+                  <div className="text-red-500">{errors.phone_number}</div>
+                ) : null}
+              </div>
+
+              <div className="">
+                <label
+                  htmlFor="descripiton"
+                  className="block text-sm font-medium text-black "
+                >
+                  Birth Date
+                </label>
+                <MobileDatePicker
+                  maxDate={dayjs()}
+                  name="birthDate"
+                  value={values.birthDate ? dayjs(values.birthDate) : null}
+                  onChange={(date) => {
+                    console.log(date?.format());
+                    handleChange({
+                      target: {
+                        name: "birthDate",
+                        value: date?.format(),
+                      },
+                    });
+                  }}
+                  className="mt-1 w-full bg-transparent border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
+                />
+                {errors.birthDate && touched.birthDate ? (
+                  <div className="text-red-500">{errors.birthDate}</div>
+                ) : null}
+              </div>
+
+              <div className={``}>
+                <CustomButton
+                  disabled={isSubmitting}
+                  type="submit"
+                  classname="px-3 py-2 w-full"
+                >
+                  {isSubmitting ? (
+                    <span className="loading loading-dots loading-sm"></span>
+                  ) : (
+                    "Update"
+                  )}
+                </CustomButton>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </LocalizationProvider>
   );
 }

@@ -1,3 +1,8 @@
+type Pagination = {
+  totalData: number;
+  totalPage: number;
+};
+
 export type CollectionData = {
   id: string;
   name: string;
@@ -15,7 +20,14 @@ export type CollectionData = {
     name: string;
     description: string;
     is_active: boolean;
-    location: string;
+    locationId: number;
+    location: {
+      id: number;
+      name: string;
+      is_active: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
     createdAt: string;
     updatedAt: string;
   };
@@ -26,10 +38,10 @@ export type CollectionData = {
     createdAt: string;
     updatedAt: string;
   };
-}[];
+};
 
 export type GetCollectionResponse = {
-  data: CollectionData;
-  success: boolean;
   message: string;
+  data: CollectionData[];
+  pagination: Pagination;
 };

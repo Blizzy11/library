@@ -1,3 +1,4 @@
+import pagination from "@/helper/helper";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -6,44 +7,69 @@ const prisma = new PrismaClient();
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
+  const pageNumber = parseInt(searchParams.get("page") || "1");
+  const pageSize = parseInt(searchParams.get("limit") || "10");
+  const searchTerm = searchParams.get("search") || "";
   const userId = searchParams.get("userId");
+  const status = searchParams.get("status") || "";
 
-  console.log("userId");
+  const offset = (pageNumber - 1) * pageSize;
 
-  if (!userId) {
-    return NextResponse.json(
-      {
-        message: "userId is required",
-      },
-      { status: 400 }
-    );
+  let whereClause: Record<string, any> = {};
+
+  if (userId) {
+    whereClause = {
+      ...whereClause,
+      id: userId,
+    };
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
+  if (status && status !== "ALL") {
+    whereClause = {
+      ...whereClause,
+      is_active: status === "active" ? true : false,
+    };
+  }
+
+  if (searchTerm) {
+    whereClause = {
+      ...whereClause,
+      OR: [
+        { username: { contains: searchTerm } },
+        { name: { contains: searchTerm } },
+        { email: { contains: searchTerm } },
+        { phone: { contains: searchTerm } },
+      ],
+    };
+  }
+
+  const user = await prisma.user.findMany({
+    skip: offset,
+    take: pageSize,
+    where: whereClause,
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
-  if (!user) {
-    return NextResponse.json(
-      {
-        message: "User not found",
-      },
-      { status: 404 }
-    );
-  } else {
-    return NextResponse.json({
-      message: "User fetched successfully",
-      data: user,
-    });
-  }
+  // pagination
+  const totalData = await prisma.user.count({ where: whereClause });
+  const totalPage = Math.ceil(totalData / pageSize);
+  const isPagination = pagination(totalData, totalPage);
+
+  return NextResponse.json({
+    message: "User fetched successfully",
+    data: user,
+    pagination: isPagination,
+  });
 }
 
 export async function PUT(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
-  const { username, email, phone_number, name } = await request.json();
+  const { username, email, phone_number, name, birthDate } =
+    await request.json();
+
   if (!userId) {
     return NextResponse.json(
       {
@@ -62,6 +88,7 @@ export async function PUT(request: Request) {
       email,
       name,
       phone: phone_number,
+      birthDate,
     },
   });
 

@@ -68,18 +68,31 @@ export async function GET(request: Request) {
   const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
   const id = searchParams.get("id");
+  const status = searchParams.get("status") || "";
 
   const offset = (pageNumber - 1) * pageSize;
 
   // where condition
-  let whereClause: Record<string, any> = { is_active: true }; // Base where clause
+  let whereClause: Record<string, any> = {};
 
   if (searchTerm) {
     whereClause.OR = [
-      { name: { contains: searchTerm, mode: "insensitive" } },
-      { description: { contains: searchTerm, mode: "insensitive" } },
-      { "rack.name": { contains: searchTerm, mode: "insensitive" } },
-      { "category.name": { contains: searchTerm, mode: "insensitive" } },
+      { name: { contains: searchTerm } },
+      { description: { contains: searchTerm } },
+      {
+        rack: {
+          name: {
+            contains: searchTerm,
+          },
+        },
+      },
+      {
+        category: {
+          name: {
+            contains: searchTerm,
+          },
+        },
+      },
     ];
   }
 
@@ -90,12 +103,23 @@ export async function GET(request: Request) {
     };
   }
 
-  const booksQuery = prisma.item.findMany({
+  if (status && status !== "ALL") {
+    whereClause = {
+      ...whereClause,
+      availability: status,
+    };
+  }
+
+  const booksQuery = await prisma.item.findMany({
     skip: offset,
     take: pageSize,
     where: whereClause,
     include: {
-      rack: true,
+      rack: {
+        include: {
+          location: true,
+        },
+      },
       category: true,
     },
     orderBy: {
@@ -103,18 +127,13 @@ export async function GET(request: Request) {
     },
   });
 
-  const totalBooks = await prisma.item.count({
-    where: { is_active: true },
-  });
-
-  const totalPages = Math.ceil(totalBooks / pageSize);
-
-  const books = await booksQuery;
+  const totalData = await prisma.item.count({ where: whereClause });
+  const totalPage = Math.ceil(totalData / pageSize);
+  const isPagination = pagination(totalData, totalPage);
 
   return NextResponse.json({
-    success: true,
     message: "Books fetched successfully",
-    data: books,
-    pagination: pagination(totalBooks, totalPages),
+    data: booksQuery,
+    pagination: isPagination,
   });
 }

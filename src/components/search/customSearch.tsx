@@ -3,6 +3,7 @@ import React from "react";
 interface CustomSearchProps {
   placeholder: string;
   onChange?: (value: string) => void;
+  setState?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CustomSearch = (props: CustomSearchProps) => {
@@ -14,7 +15,10 @@ const CustomSearch = (props: CustomSearchProps) => {
         className="w-full pl-3 pr-10 py-2 border-2 border-black rounded-md focus:outline-none focus:border-fuchsia-500 transition-colors"
         placeholder={props.placeholder}
         autoComplete="off"
-        onChange={(e) => props.onChange && props.onChange(e.target.value)}
+        onChange={(e) => {
+          props.onChange && props.onChange(e.target.value);
+          props.setState && props.setState(e.target.value);
+        }}
       />
       <button className="block w-7 h-7 text-center text-xl leading-0 absolute top-2 right-2 text-gray-400 focus:outline-none hover:text-gray-900 transition-colors">
         <svg

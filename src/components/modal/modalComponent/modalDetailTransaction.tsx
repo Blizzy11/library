@@ -10,21 +10,26 @@ import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { truncateDescription } from "@/helper/helper";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import CustomButton from "@/components/button/customButton";
 
 dayjs.extend(advancedFormat);
 
 interface ModalDetailTransactionProps {
   isOpen: boolean;
   onClose: () => void;
+  reFetchData?: (reset: boolean) => void;
 }
 
 const ModalDetailTransaction = ({
   isOpen,
   onClose,
+  reFetchData,
 }: ModalDetailTransactionProps) => {
   const [data, setData] = useState<GetTransactionDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const searchParams = useSearchParams();
+  const session = useSession();
 
   const handleCloseModal = () => {
     onClose();
@@ -54,6 +59,60 @@ const ModalDetailTransaction = ({
     setIsLoading(false);
   };
 
+  const approveTransaction = async (transactionId: string) => {
+    console.log(transactionId);
+    const data = {
+      transactionId: transactionId,
+      approvedAt: dayjs().toISOString(),
+    };
+    try {
+      await axios
+        .post("/api/v1/transaction/borrow/approve", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          if (reFetchData) {
+            reFetchData(true);
+          }
+          handleCloseModal();
+          toast.success(res.data.message);
+        })
+        .catch((err) => {
+          toast.error(err.response.data.message);
+        });
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const declineTransaction = async (transactionId: string) => {
+    const data = {
+      transactionId: transactionId,
+    };
+    try {
+      await axios
+        .post("/api/v1/transaction/borrow/decline", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
+          if (reFetchData) {
+            reFetchData(true);
+          }
+          handleCloseModal();
+          toast.success(res.data.message);
+        })
+        .catch((err) => {
+          toast.error(err.response.data.message);
+        });
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
+
   useEffect(() => {
     const id = searchParams.get("transactionId");
     if (id) {
@@ -79,6 +138,7 @@ const ModalDetailTransaction = ({
       isOpen={isOpen}
       onClose={handleCloseModal}
       modalTitle="Transaction Detail"
+      buttonCloseActive={session.data?.user.role === "ADMIN" ? false : true}
     >
       <div>
         {isLoading ? (
@@ -125,23 +185,71 @@ const ModalDetailTransaction = ({
               <p>Collection Name</p>
               <div className="flex items-center col-span-2">
                 <span className="pr-1">:</span>
-                <span className="pl-1">{data.Item.name}</span>
+                <span className="pl-1">{data.item.name}</span>
               </div>
 
               <p>Collection Description</p>
               <div className="flex items-start col-span-2">
                 <span className="pr-1">:</span>
                 <span className="pl-1 text-justify">
-                  {truncateDescription(data.Item.description, 50)}{" "}
+                  {truncateDescription(data.item.description, 50)}{" "}
                   <Link
-                    href={`/app/collection/${data.Item.id}`}
+                    href={`/app/collection/${data.item.id}`}
                     className="text-blue-500 underline"
                   >
                     read more
                   </Link>
                 </span>
               </div>
+
+              <p>Collection Status</p>
+              <div className="flex items-center col-span-2">
+                <span className="pr-1">:</span>
+                <span className="pl-1">{data.item.availability}</span>
+              </div>
             </div>
+
+            {session.data?.user.role === "ADMIN" && (
+              <div className="col-span-3 flex justify-end gap-4 pt-3">
+                {data.status === "PENDING" && (
+                  <>
+                    <div>
+                      <CustomButton
+                        onClick={() => {
+                          approveTransaction(data.id);
+                        }}
+                        type="button"
+                        classname="py-1 px-3"
+                      >
+                        Approve
+                      </CustomButton>
+                    </div>
+
+                    <div>
+                      <CustomButton
+                        onClick={() => {
+                          declineTransaction(data.id);
+                        }}
+                        type="button"
+                        classname="py-1 px-3"
+                      >
+                        Reject
+                      </CustomButton>
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <CustomButton
+                    onClick={handleCloseModal}
+                    type="button"
+                    classname="py-1 px-3"
+                  >
+                    Close
+                  </CustomButton>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className={`flex justify-center items-center p-5`}>

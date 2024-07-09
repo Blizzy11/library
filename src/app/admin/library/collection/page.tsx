@@ -1,5 +1,6 @@
 "use server";
 
+import { CollectionPagesComponent } from "@/components/admin/collection/collectionPages";
 import CustomButton from "@/components/button/customButton";
 import CustomSearch from "@/components/search/customSearch";
 import Table from "@/components/table/table";
@@ -47,17 +48,9 @@ const dataHeader = [
 
 const BookPage = async () => {
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <Link href="/admin/library/collection/addCollection">
-          <CustomButton type="button" classname="py-2 px-3">
-            <div className="flex gap-2 items-center">
-              Add Collection <AiOutlinePlus />
-            </div>
-          </CustomButton>
-        </Link>
-      </div>
-      <Table dataHeader={dataHeader} url="/api/v1/collection" />
+    <div className="flex flex-col gap-4">
+      <span className="text-xl font-bold">Library</span>
+      <CollectionPagesComponent />
     </div>
   );
 };

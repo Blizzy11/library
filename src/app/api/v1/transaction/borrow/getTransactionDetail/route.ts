@@ -21,8 +21,8 @@ export async function GET(request: Request) {
       id: borrowId as string,
     },
     include: {
-      Item: true,
-      User: true,
+      item: true,
+      user: true,
     },
   });
 

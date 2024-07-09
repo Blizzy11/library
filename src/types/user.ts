@@ -1,9 +1,13 @@
 import { $Enums } from "@prisma/client";
 
+type Pagination = {
+  totalData: number;
+  totalPage: number;
+};
+
 export type GetUserProfileResponse = {
   id: string;
   username: string;
-  nik: string | null;
   email: string;
   name: string | null;
   birthDate: Date | null;
@@ -13,4 +17,10 @@ export type GetUserProfileResponse = {
   createdAt: Date;
   updatedAt: Date;
   role: $Enums.UserRole;
+};
+
+export type GetAllUserResponse = {
+  message: string;
+  data: GetUserProfileResponse[];
+  pagination: Pagination;
 };

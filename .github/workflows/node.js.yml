@@ -19,11 +19,12 @@ jobs:
         node-version: [20.10.0]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     env:
-      DATABASE_URL: ${{secret.DATABASE_URL}}
-      API_URL: ${{secret.API_URL}}
-      AUTH_SECRET: ${{secret.AUTH_SECRET}}
-      NEXTAUTH_URL: ${{secret.NEXTAUTH_URL}}
-      NEXTAUTH_SECRET: ${{secret.NEXTAUTH_SECRET}}
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      API_URL: ${{secrets.API_URL}}
+      AUTH_SECRET: ${{secrets.AUTH_SECRET}}
+      NEXTAUTH_URL: ${{secrets.NEXTAUTH_URL}}
+      NEXTAUTH_SECRET: ${{secrets.NEXTAUTH_SECRET}}
+      AUTH_TRUST_HOST: ${{secrets.AUTH_TRUST_HOST}}
 
     steps:
     - uses: actions/checkout@v4

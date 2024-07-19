@@ -13,7 +13,7 @@ const ProfilePage = async () => {
   return <ProfileUpdate data={isProfile} refetch={getUserProfile} />;
 };
 
-export async function getUserProfile() {
+async function getUserProfile() {
   const session = await auth();
 
   const data = await prisma.user.findUnique({

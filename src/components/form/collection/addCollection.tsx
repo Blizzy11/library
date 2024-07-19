@@ -2,21 +2,40 @@
 import CustomButton from "@/components/button/customButton";
 import RainbowLoading from "@/components/loading/rainbowLoading";
 import { GetCategoryResponseArray } from "@/types/category";
+import { GetCollectionByIdResponse } from "@/types/collection";
 import { GetRackResponseArray } from "@/types/rack";
 import axios from "axios";
-import { Field, Formik } from "formik";
+import dayjs from "dayjs";
+import { ErrorMessage, Field, Formik } from "formik";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
 
-const AddCollectionForm = () => {
+interface CollectionFormProps {
+  // reFetchData: () => void;
+  data?: GetCollectionByIdResponse;
+}
+
+const CollectionForm = ({ data }: CollectionFormProps) => {
+  // Get uer session
+  const { data: session } = useSession();
+
   const [file, setFile] = useState<File | null>(null);
   const [category, setcategory] = useState<GetCategoryResponseArray>([]);
   const [rack, setrack] = useState<GetRackResponseArray>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
+
+  const [initialValues, setInitialValues] = useState({
+    name: data?.name || "",
+    description: data?.description || "",
+    rackId: data?.rackId || "",
+    categoryId: data?.categoryId || "",
+    imageCover: "",
+  });
 
   const formValidation = Yup.object().shape({
     name: Yup.string()
@@ -62,31 +81,62 @@ const AddCollectionForm = () => {
   }, []);
 
   const handleSubmit = async (values: any, action: any) => {
-    const data = {
+    const value: any = {
       name: values.name,
       description: values.description,
       rackId: values.rackId,
       categoryId: values.categoryId,
       imageCover: values.imageCover,
     };
+
+    if (data?.id) {
+      value.updatedBy = session?.user.id;
+      value.updatedAt = dayjs().toISOString();
+    } else {
+      value.createdBy = session?.user.id;
+    }
+
     try {
-      await axios
-        .post("/api/v1/collection", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((res) => {
-          toast.success(res.data.message);
-          action.resetForm();
-          router.refresh();
-        })
-        .catch((error) => {
-          toast.error(error.response.data.message || error.message);
-        });
+      if (data?.id) {
+        await axios
+          .put(`/api/v1/collection`, value, {
+            params: {
+              id: data?.id,
+            },
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+          .then((res) => {
+            console.log(res.data);
+            toast.success(res.data.message);
+            // action.resetForm();
+            router.refresh();
+          })
+          .catch((error) => {
+            console.log(error);
+            toast.error(error.response.data.message || error.message);
+          });
+      } else {
+        await axios
+          .post("/api/v1/collection", value, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+          .then((res) => {
+            toast.success(res.data.message);
+            action.resetForm();
+            // router.refresh();
+          })
+          .catch((error) => {
+            toast.error(error.response.data.message || error.message);
+          });
+      }
     } catch (error) {
       toast.error("Something went wrong");
     }
+    action.setSubmitting(false);
   };
 
   // is loading true
@@ -97,19 +147,12 @@ const AddCollectionForm = () => {
   return (
     <div>
       <Formik
-        initialValues={{
-          name: "",
-          description: "",
-          rackId: "",
-          categoryId: "",
-          imageCover: null,
-        }}
+        initialValues={initialValues}
         validationSchema={formValidation}
         onSubmit={(values, action) => {
           values.imageCover = (file?.name as any) || null;
           // console.log(values);
           handleSubmit(values, action);
-          action.setSubmitting(false);
         }}
       >
         {({
@@ -141,9 +184,11 @@ const AddCollectionForm = () => {
                     "border border-black p-2 w-full rounded-md focus:outline-none focus:border-fuchsia-500"
                   }
                 />
-                {errors.name && touched.name && (
-                  <div className="text-red-500">{errors.name}</div>
-                )}
+                <ErrorMessage
+                  name="name"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
             </div>
             <div>
@@ -156,6 +201,7 @@ const AddCollectionForm = () => {
               <div className={"mt-1"}>
                 <Field
                   as="textarea"
+                  rows={5}
                   name="description"
                   placeholder="Description"
                   id="description"
@@ -166,9 +212,11 @@ const AddCollectionForm = () => {
                     "border border-black p-2 w-full rounded-md focus:outline-none focus:border-fuchsia-500"
                   }
                 />
-                {errors.description && touched.description && (
-                  <div className="text-red-500">{errors.description}</div>
-                )}
+                <ErrorMessage
+                  name="description"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
             </div>
             <div>
@@ -199,9 +247,11 @@ const AddCollectionForm = () => {
                     </option>
                   ))}
                 </Field>
-                {errors.rackId && touched.rackId && (
-                  <div className="text-red-500">{errors.rackId}</div>
-                )}
+                <ErrorMessage
+                  name="rackId"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
             </div>
             <div>
@@ -232,9 +282,11 @@ const AddCollectionForm = () => {
                     </option>
                   ))}
                 </Field>
-                {errors.categoryId && touched.categoryId && (
-                  <div className="text-red-500">{errors.categoryId}</div>
-                )}
+                <ErrorMessage
+                  name="categoryId"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
             </div>
             <div>
@@ -242,7 +294,8 @@ const AddCollectionForm = () => {
                 htmlFor="name"
                 className={"block text-sm font-semibold text-black"}
               >
-                Image Cover
+                Image Cover{" "}
+                <span className="text-red-500 text-[9px]">Tidak wajib</span>
               </label>
               <div className={"mt-1"}>
                 <Field
@@ -296,4 +349,4 @@ const AddCollectionForm = () => {
   );
 };
 
-export default AddCollectionForm;
+export default CollectionForm;

@@ -76,7 +76,9 @@ model Item {
   is_active    Boolean      @default(true)
   views        Int          @default(0)
   availability Availability @default(AVAILABLE)
+  createdBy    String
   createdAt    DateTime     @default(now())
+  updatedBy    String?
   updatedAt    DateTime     @updatedAt
   rack         Rack         @relation(fields: [rackId], references: [id])
   category     Category     @relation(fields: [categoryId], references: [id])

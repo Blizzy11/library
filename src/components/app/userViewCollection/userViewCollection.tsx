@@ -3,9 +3,15 @@
 import CustomButton from "@/components/button/customButton";
 import Modal from "@/components/modal/Modal";
 import ModalFormBorrow from "@/components/modal/modalComponent/modalFormBorrow";
+import {
+  useSendMessageTransactionRequest,
+  useLastTransactionApproved,
+} from "@/helper/customHook";
 import { thousandSeparator } from "@/helper/helper";
 import { CollectionData } from "@/types/collection";
+import { GetTransactionDetailResponse } from "@/types/transaction";
 import axios from "axios";
+import dayjs from "dayjs";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { AiOutlineHeart, AiOutlineSelect } from "react-icons/ai";
@@ -16,7 +22,7 @@ interface UserViewCollectionProps {
 }
 
 const UserViewCollection = ({ id }: UserViewCollectionProps) => {
-  const [data, setData] = useState<CollectionData>([]);
+  const [data, setData] = useState<CollectionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,7 +35,7 @@ const UserViewCollection = ({ id }: UserViewCollectionProps) => {
           },
         })
         .then((res) => {
-          setData(res.data.data);
+          setData(res.data.data[0]);
         })
         .catch((error) => {
           toast.error(error.response.data.message);
@@ -40,8 +46,15 @@ const UserViewCollection = ({ id }: UserViewCollectionProps) => {
     setIsLoading(false);
   };
 
+  // get last data approved or returned
+  const dataLastApproved = useLastTransactionApproved(id)
+    .data as unknown as GetTransactionDetailResponse;
+
+  const dataAdminUser = useSendMessageTransactionRequest().dataUser;
+
   useEffect(() => {
     getCollection();
+    // getLastTransactionApproved();
   }, [id]);
 
   return (
@@ -55,10 +68,10 @@ const UserViewCollection = ({ id }: UserViewCollectionProps) => {
           <div className={`flex flex-col`}>
             <div className="flex flex-col">
               <div className={`border-b border-black p-3`}>
-                {data[0] && data[0].imageCover ? (
+                {data && data.imageCover ? (
                   <Image
-                    src={data[0].imageCover}
-                    alt={data[0].name}
+                    src={data.imageCover}
+                    alt={data.name}
                     className="m-auto h-24 w-24"
                   />
                 ) : (
@@ -89,22 +102,29 @@ const UserViewCollection = ({ id }: UserViewCollectionProps) => {
               </div>
 
               <p className="text-xl font-bold px-3 py-2 border-b border-black">
-                {data[0] && data[0].name}
+                {data && data.name}
               </p>
 
               <div
                 className={`border-b border-black flex flex-row justify-around p-3 text-sm items-center`}
               >
                 <div className={`border border-black px-2 py-1`}>
-                  {data[0] && data[0].availability}
+                  {data && data.availability}
                 </div>
-                <div>{thousandSeparator(data[0] && data[0].views)} dilihat</div>
+                <div>
+                  {thousandSeparator((data && data.views) || 0)} dilihat
+                </div>
               </div>
 
               <div className={`p-3 text-sm border-b border-black`}>
-                <p className={`text-justify`}>
-                  {data[0] && data[0].description}
-                </p>
+                {dataLastApproved && (
+                  <p className="text-red-500">
+                    This item estimated available or return in{" "}
+                    {dayjs(dataLastApproved?.returnDate).diff(dayjs(), "days")}{" "}
+                    days
+                  </p>
+                )}
+                <p className={`text-justify`}>{data && data.description}</p>
               </div>
 
               <div
@@ -137,7 +157,9 @@ const UserViewCollection = ({ id }: UserViewCollectionProps) => {
                 <ModalFormBorrow
                   isOpen={isOpen}
                   onClose={() => setIsOpen(false)}
-                  collectionId={data[0] && data[0].id}
+                  collectionId={data?.id ?? ""}
+                  dataCollectionApproved={dataLastApproved}
+                  dataAdminUserForSendNotification={dataAdminUser}
                 />
               </div>
             </div>

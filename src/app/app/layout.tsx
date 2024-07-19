@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import Navbar from "@/components/sidebar/navbar";
 import Sidebar from "@/components/sidebar/sidebar";
 import { SessionProvider } from "next-auth/react";
+import "@/style/layout.css";
 
 export default async function UserLayout({
   children,

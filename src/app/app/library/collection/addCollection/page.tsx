@@ -1,6 +1,6 @@
 import CollectionForm from "@/components/form/collection/addCollection";
 
-const AddCollectionPage = () => {
+const UserAddCollectionPage = () => {
   return (
     <div className={"flex flex-col border border-black"}>
       <div className="border-b border-black p-5">
@@ -13,4 +13,4 @@ const AddCollectionPage = () => {
   );
 };
 
-export default AddCollectionPage;
+export default UserAddCollectionPage;

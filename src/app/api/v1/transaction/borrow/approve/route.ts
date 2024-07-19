@@ -1,3 +1,4 @@
+import { generateTransactionMessage, sendMessage } from "@/helper/helper";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -54,9 +55,39 @@ export async function POST(request: Request) {
     );
   }
 
+  // check if start date greater then return date last approved or return transaction
+  const lastTransaction = await prisma.borrow.findFirst({
+    where: {
+      itemId: isTransaction.itemId,
+      status: {
+        in: ["APPROVED", "RETURNED"],
+      },
+    },
+    orderBy: {
+      returnDate: "desc",
+    },
+  });
+
+  if (
+    lastTransaction &&
+    isTransaction.borrowDate < lastTransaction?.returnDate
+  ) {
+    return NextResponse.json(
+      {
+        message:
+          "Borrow date must be greater then return date last approved or return transaction",
+      },
+      { status: 400 }
+    );
+  }
+
   const transaction = await prisma.borrow.update({
     where: {
       id: transactionId,
+    },
+    include: {
+      item: true,
+      user: true,
     },
     data: {
       status: "APPROVED",
@@ -74,6 +105,21 @@ export async function POST(request: Request) {
   });
 
   if (transaction && updateItem) {
+    // send notification whatsapp when approve
+    const isMessage = generateTransactionMessage({
+      adminName: transaction.approvedBy?.toString() || "",
+      userName: transaction.user.username,
+      collectionTitle: transaction.item.name,
+      borrowDate: transaction.borrowDate.toString(),
+      returnDate: transaction.returnDate.toString(),
+      status: "approved",
+    });
+
+    // send notification to user
+    transaction &&
+      transaction.user.phone &&
+      sendMessage(isMessage, transaction.user.phone.toString());
+
     return NextResponse.json(
       {
         message: "Transaction approved",

@@ -111,6 +111,9 @@ export async function GET(request: Request) {
   const searchTerm = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
 
+  // if role user
+  const bookOwnerId = searchParams.get("bookOwnerId");
+
   const offset = (pageNumber - 1) * pageSize;
 
   let whereClause: Record<string, any> = {};
@@ -133,6 +136,15 @@ export async function GET(request: Request) {
     whereClause = {
       ...whereClause,
       status,
+    };
+  }
+
+  if (bookOwnerId) {
+    whereClause = {
+      ...whereClause,
+      item: {
+        createdBy: bookOwnerId,
+      },
     };
   }
 

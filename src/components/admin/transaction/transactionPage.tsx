@@ -6,6 +6,7 @@ import CustomSearch from "@/components/search/customSearch";
 import { GetTransactionResponse } from "@/types/transaction";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiOutlineContainer } from "react-icons/ai";
@@ -39,6 +40,9 @@ const selectOptions = [
 ];
 
 export function TransactionPage() {
+  // Get session
+  const { data: session } = useSession();
+
   const router = useRouter();
   const [data, setData] = useState<GetTransactionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,13 +56,20 @@ export function TransactionPage() {
   const getTransaction = async (reset: boolean = false) => {
     setIsLoading(true);
     try {
+      // set params
+      const params: any = {
+        page: page,
+        limit: 10,
+        status: getStatusParams,
+        search: querySearch,
+      };
+
+      if (session && session.user.role === "USER") {
+        params.bookOwnerId = session.user.id;
+      }
+
       const res = await axios.get("/api/v1/transaction/borrow", {
-        params: {
-          page: page,
-          limit: 10,
-          status: getStatusParams,
-          search: querySearch,
-        },
+        params,
       });
 
       setData((prevData) => ({
@@ -114,10 +125,18 @@ export function TransactionPage() {
                 return;
               }
 
-              router.push(
-                `/admin/transaction?status=${option.value}`,
-                undefined
+              console.log(window.location.pathname);
+
+              window.history.replaceState(
+                null,
+                "",
+                `${window.location.pathname}?status=${option.value}`
               );
+
+              // router.push(
+              //   `/admin/transaction?status=${option.value}`,
+              //   undefined
+              // );
             }}
           >
             {option.label}
@@ -163,10 +182,23 @@ export function TransactionPage() {
                         className={`bg-black text-white rounded-md p-1 w-fit`}
                         onClick={() => {
                           setOpenModal(true);
-                          router.push(
-                            "/admin/transaction?transactionId=" + data.id,
-                            undefined
+
+                          const searchParams = new URLSearchParams(
+                            window.location.search
                           );
+                          searchParams.set("transactionId", data.id);
+
+                          window.history.replaceState(
+                            null,
+                            "",
+                            `${
+                              window.location.pathname
+                            }?${searchParams.toString()}`
+                          );
+
+                          // router.push(
+                          //   `/admin/transaction?${searchParams.toString()}`
+                          // );
                         }}
                       >
                         See Detail

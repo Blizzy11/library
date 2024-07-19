@@ -1,0 +1,25 @@
+.carousel-card {
+  box-shadow: 6px 6px #d946ef;
+  border-radius: 10px;
+}
+
+.collapse {
+  border: 1px solid black;
+}
+
+.collapse input:checked ~ .collapse-title,
+.collapse input:checked ~ .collapse-content {
+  background-color: #d946ef; /* Warna fuchsia */
+  color: white;
+  border: none;
+}
+
+.collapse input:checked ~ .collapse-content {
+  background-color: #d946ef; /* Warna fuchsia */
+  color: white;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+}
+
+.collapse input:checked ~ .collapse-title {
+  border-bottom: 1px solid white;
+}

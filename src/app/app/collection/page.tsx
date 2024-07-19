@@ -9,7 +9,7 @@ const CollectionPage = () => {
       <div className={`border-b border-black p-3 w-full text-center`}>
         <p className="text-2xl font-bold">Collection</p>
       </div>
-      <div className={`py-3 px-3`}>
+      <div className={`py-3 px-3 w-full`}>
         <Collection />
       </div>
     </div>

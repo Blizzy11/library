@@ -7,7 +7,7 @@ import { Form, Formik } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
 
-export const LoginPage = () => {
+const LoginPage = () => {
   const formValidation = Yup.object().shape({
     username: Yup.string().required("Username is required"),
     password: Yup.string().required("Password is required"),
@@ -118,7 +118,7 @@ export const LoginPage = () => {
         {/* Create account when need */}
         <div>
           <span>
-            You don't have an account?{" "}
+            {`You don't have an account?`}
             <Link
               href="/signup"
               className="text-blue-800 underline underline-offset-2"

@@ -56,7 +56,6 @@ async function main() {
     data: {
       username: "admin",
       password: bycrypt.hashSync("admin", 10),
-      nik: "13931222",
       name: "Admin",
       email: "haris@mail.com",
     },
@@ -70,13 +69,13 @@ async function main() {
     });
   });
 
-  // dataRack.map(async (data) => {
-  //   await prisma.rack.create({
-  //     data: {
-  //       ...data,
-  //     },
-  //   });
-  // });
+  dataRack.map(async (data) => {
+    await prisma.rack.create({
+      data: {
+        ...data,
+      },
+    });
+  });
 
   dataCategory.map(async (data) => {
     await prisma.category.create({

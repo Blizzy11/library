@@ -199,7 +199,7 @@ const SignUpPage = () => {
                 ) : null}
               </div>
               <CustomButton
-                classname="w-full"
+                classname="w-full py-1 px-2"
                 type="submit"
                 disabled={isSubmitting}
               >

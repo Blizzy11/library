@@ -7,6 +7,7 @@ import Pagination from "../pagination/pagination";
 import { toast } from "sonner";
 import CustomButton from "../button/customButton";
 import Modal from "../modal/Modal";
+import Image from "next/image";
 
 interface TableProps {
   data?: any[];
@@ -70,8 +71,10 @@ export default function Table(props: TableProps) {
             isOpen={openModal}
             onClose={() => setOpenModal(false)}
             modalTitle={props.addTextButton || "Add"}
-            children={props.modalChildren}
-          />
+            // children={props.modalChildren}
+          >
+            {props.modalChildren}
+          </Modal>
         </div>
       )}
       <div className={"flex flex-row-reverse justify-between"}>
@@ -111,7 +114,9 @@ export default function Table(props: TableProps) {
                       return (
                         <td key={columnIndex}>
                           {column.type === "image" ? (
-                            <img
+                            <Image
+                              width={50}
+                              height={50}
                               src={item[column.key]}
                               alt={(item as any).name}
                               className="w-10 h-10 rounded-full"

@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   const searchTerm = searchParams.get("search") || "";
   const userId = searchParams.get("userId");
   const status = searchParams.get("status") || "";
+  const role = searchParams.get("role") || "";
 
   const offset = (pageNumber - 1) * pageSize;
 
@@ -21,6 +22,13 @@ export async function GET(req: Request) {
     whereClause = {
       ...whereClause,
       id: userId,
+    };
+  }
+
+  if (role) {
+    whereClause = {
+      ...whereClause,
+      role,
     };
   }
 

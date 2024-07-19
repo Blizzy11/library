@@ -29,7 +29,7 @@ const ModalDetailTransaction = ({
   const [data, setData] = useState<GetTransactionDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const searchParams = useSearchParams();
-  const session = useSession();
+  const { data: session } = useSession();
 
   const handleCloseModal = () => {
     onClose();
@@ -60,10 +60,15 @@ const ModalDetailTransaction = ({
   };
 
   const approveTransaction = async (transactionId: string) => {
-    console.log(transactionId);
+    if (!session) {
+      toast.error("You have not access to approve this transaction");
+      return;
+    }
+
     const data = {
       transactionId: transactionId,
       approvedAt: dayjs().toISOString(),
+      approvedBy: session.user.name,
     };
     try {
       await axios
@@ -80,6 +85,7 @@ const ModalDetailTransaction = ({
           toast.success(res.data.message);
         })
         .catch((err) => {
+          console.log(err);
           toast.error(err.response.data.message);
         });
     } catch (error) {
@@ -88,6 +94,11 @@ const ModalDetailTransaction = ({
   };
 
   const declineTransaction = async (transactionId: string) => {
+    if (!session) {
+      toast.error("You have not access to decline this transaction");
+      return;
+    }
+
     const data = {
       transactionId: transactionId,
     };
@@ -138,7 +149,8 @@ const ModalDetailTransaction = ({
       isOpen={isOpen}
       onClose={handleCloseModal}
       modalTitle="Transaction Detail"
-      buttonCloseActive={session.data?.user.role === "ADMIN" ? false : true}
+      buttonCloseActive={false}
+      // buttonCloseActive={session.data?.user.role === "ADMIN" ? false : true}
     >
       <div>
         {isLoading ? (
@@ -209,47 +221,47 @@ const ModalDetailTransaction = ({
               </div>
             </div>
 
-            {session.data?.user.role === "ADMIN" && (
-              <div className="col-span-3 flex justify-end gap-4 pt-3">
-                {data.status === "PENDING" && (
-                  <>
-                    <div>
-                      <CustomButton
-                        onClick={() => {
-                          approveTransaction(data.id);
-                        }}
-                        type="button"
-                        classname="py-1 px-3"
-                      >
-                        Approve
-                      </CustomButton>
-                    </div>
+            {/* {session.data?.user.role === "ADMIN" && ( */}
+            <div className="col-span-3 flex justify-end gap-4 pt-3">
+              {data.status === "PENDING" && (
+                <>
+                  <div>
+                    <CustomButton
+                      onClick={() => {
+                        approveTransaction(data.id);
+                      }}
+                      type="button"
+                      classname="py-1 px-3"
+                    >
+                      Approve
+                    </CustomButton>
+                  </div>
 
-                    <div>
-                      <CustomButton
-                        onClick={() => {
-                          declineTransaction(data.id);
-                        }}
-                        type="button"
-                        classname="py-1 px-3"
-                      >
-                        Reject
-                      </CustomButton>
-                    </div>
-                  </>
-                )}
+                  <div>
+                    <CustomButton
+                      onClick={() => {
+                        declineTransaction(data.id);
+                      }}
+                      type="button"
+                      classname="py-1 px-3"
+                    >
+                      Reject
+                    </CustomButton>
+                  </div>
+                </>
+              )}
 
-                <div>
-                  <CustomButton
-                    onClick={handleCloseModal}
-                    type="button"
-                    classname="py-1 px-3"
-                  >
-                    Close
-                  </CustomButton>
-                </div>
+              <div>
+                <CustomButton
+                  onClick={handleCloseModal}
+                  type="button"
+                  classname="py-1 px-3"
+                >
+                  Close
+                </CustomButton>
               </div>
-            )}
+            </div>
+            {/* )} */}
           </div>
         ) : (
           <div className={`flex justify-center items-center p-5`}>

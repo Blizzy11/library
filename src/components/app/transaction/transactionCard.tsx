@@ -99,7 +99,7 @@ const TransactionCard = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="text-lg font-bold">{item.Item.name}</div>
+                <div className="text-lg font-bold">{item.item.name}</div>
                 <div className="text-xs">
                   {dayjs(item.borrowDate).format("dddd, DD MMMM YYYY") +
                     " - " +

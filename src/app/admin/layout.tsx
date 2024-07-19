@@ -16,7 +16,7 @@ export default async function AdminLayout({
     <SessionProvider session={session}>
       <Navbar role={session?.user.role?.toString()} />
       <div className="flex">
-        <Sidebar />
+        <Sidebar role={session?.user.role?.toString()} />
         <div></div>
         <div className="flex-1 p-5 md:p-10 lg:p-10 sm:ml-64 mt-20 overflow-x-hidden">
           {children}

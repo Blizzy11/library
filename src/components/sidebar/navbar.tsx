@@ -4,6 +4,100 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 
+const adminMenu = [
+  {
+    name: "Dashboard",
+    link: "/admin",
+  },
+  {
+    name: "Transaction",
+    link: "/admin/transaction",
+  },
+  {
+    name: "User List",
+    link: "/admin/user",
+  },
+  {
+    name: "Library",
+    link: "/admin/library",
+    submenu: [
+      {
+        name: "Collection",
+        link: "/admin/library/collection",
+      },
+      {
+        name: "Category",
+        link: "/admin/library/category",
+      },
+      {
+        name: "Rack",
+        link: "/admin/library/rack",
+      },
+      {
+        name: "Location",
+        link: "/admin/library/location",
+      },
+    ],
+  },
+  {
+    name: "Settings",
+    link: "/admin/setting",
+    submenu: [
+      {
+        name: "Profile",
+        link: "/admin/setting/profile",
+      },
+    ],
+  },
+];
+
+const userMenu = [
+  {
+    name: "Dashboard",
+    link: "/app",
+  },
+  {
+    name: "Collection List",
+    link: "/app/collection",
+  },
+  {
+    name: "Transaction History",
+    link: "/app/transaction",
+  },
+  {
+    name: "Library",
+    link: "/app/library",
+    submenu: [
+      {
+        name: "My Collection",
+        link: "/app/library/collection",
+      },
+      {
+        name: "My Transaction",
+        link: "/app/library/transaction",
+      },
+      // {
+      //   name: "Rack",
+      //   link: "/app/library/rack",
+      // },
+      // {
+      //   name: "Location",
+      //   link: "/app/library/location",
+      // },
+    ],
+  },
+  {
+    name: "Settings",
+    link: "/app/setting",
+    submenu: [
+      {
+        name: "Profile",
+        link: "/app/setting/profile",
+      },
+    ],
+  },
+];
+
 interface NavbarProps {
   role?: string;
 }
@@ -77,7 +171,35 @@ const Navbar = ({ role }: NavbarProps) => {
           <ul className="space-y-4 menu">
             {role === "ADMIN" ? (
               <>
-                <li>
+                {adminMenu.map(
+                  (item, index) =>
+                    (item.submenu && (
+                      <li key={index}>
+                        <details>
+                          <summary>{item.name}</summary>
+                          <ul>
+                            {item.submenu.map((subItem, index) => (
+                              <li key={index}>
+                                <Link
+                                  href={subItem.link}
+                                  className="text-gray-700"
+                                >
+                                  {subItem.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      </li>
+                    )) || (
+                      <li key={index}>
+                        <Link href={item.link} className="text-gray-700">
+                          {item.name}
+                        </Link>
+                      </li>
+                    )
+                )}
+                {/* <li>
                   <Link href={"/admin/dashboard"} className="text-gray-700">
                     Dashboard
                   </Link>
@@ -126,11 +248,39 @@ const Navbar = ({ role }: NavbarProps) => {
                       </li>
                     </ul>
                   </details>
-                </li>
+                </li> */}
               </>
             ) : (
               <>
-                <li>
+                {userMenu.map(
+                  (item, index) =>
+                    (item.submenu && (
+                      <li key={index}>
+                        <details>
+                          <summary>{item.name}</summary>
+                          <ul>
+                            {item.submenu.map((subItem, index) => (
+                              <li key={index}>
+                                <Link
+                                  href={subItem.link}
+                                  className="text-gray-700"
+                                >
+                                  {subItem.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      </li>
+                    )) || (
+                      <li key={index}>
+                        <Link href={item.link} className="text-gray-700">
+                          {item.name}
+                        </Link>
+                      </li>
+                    )
+                )}
+                {/* <li>
                   <Link href={"/user/dashboard"} className="text-gray-700">
                     Dashboard
                   </Link>
@@ -168,7 +318,7 @@ const Navbar = ({ role }: NavbarProps) => {
                       </li>
                     </ul>
                   </details>
-                </li>
+                </li> */}
               </>
             )}
 

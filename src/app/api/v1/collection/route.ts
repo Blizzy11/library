@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 // add book
 export async function POST(request: Request) {
-  const { name, description, rackId, categoryId, imageCover } =
+  const { name, description, rackId, categoryId, imageCover, createdBy } =
     await request.json();
 
   // Prevent if collection name already exists in rack and location
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
       rackId: +rackId,
       categoryId: +categoryId,
       imageCover,
+      createdBy,
     },
   });
 
@@ -62,6 +63,50 @@ export async function POST(request: Request) {
   }
 }
 
+// Update collection
+export async function PUT(request: Request) {
+  const { name, description, rackId, categoryId, imageCover, updatedBy } =
+    await request.json();
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  const book = await prisma.item.update({
+    where: {
+      id: id as string,
+    },
+    data: {
+      name,
+      description,
+      rackId: +rackId,
+      categoryId: +categoryId,
+      imageCover,
+      updatedBy,
+    },
+  });
+
+  if (book) {
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Book updated successfully",
+        data: book,
+      },
+      {
+        status: 200,
+      }
+    );
+  } else {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Book not updated",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const pageNumber = parseInt(searchParams.get("page") || "1");
@@ -69,6 +114,9 @@ export async function GET(request: Request) {
   const searchTerm = searchParams.get("search") || "";
   const id = searchParams.get("id");
   const status = searchParams.get("status") || "";
+
+  // If have user id then filter by user
+  const userId = searchParams.get("userId");
 
   const offset = (pageNumber - 1) * pageSize;
 
@@ -100,6 +148,13 @@ export async function GET(request: Request) {
     whereClause = {
       ...whereClause,
       id: id,
+    };
+  }
+
+  if (userId) {
+    whereClause = {
+      ...whereClause,
+      createdBy: userId,
     };
   }
 

@@ -16,6 +16,7 @@ import { truncateDescription } from "@/helper/helper";
 import { AiOutlinePartition } from "react-icons/ai";
 import ModalDetailCollection from "@/components/modal/modalComponent/modalDetailCollection";
 import { BsHddRackFill } from "react-icons/bs";
+import { useSession } from "next-auth/react";
 
 const selectOptions = [
   {
@@ -40,7 +41,18 @@ const selectOptions = [
   },
 ];
 
+type ParamsGetCollection = {
+  page: number;
+  limit: number;
+  status?: string;
+  search?: string;
+  userId?: string;
+};
+
 export function CollectionPagesComponent() {
+  // Get session
+  const { data: session } = useSession();
+
   const router = useRouter();
   const [data, setData] = useState<GetCollectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,18 +61,24 @@ export function CollectionPagesComponent() {
   const [querySearch, setQuerySearch] = useState<string>("");
 
   const useParams = useSearchParams();
-  const getStatusParams = useParams.get("status");
+  const getStatusParams = useParams.get("status") ?? "";
 
   const getTransaction = async (reset: boolean = false) => {
     setIsLoading(true);
     try {
+      const params: ParamsGetCollection = {
+        page: page,
+        limit: 10,
+        status: getStatusParams,
+        search: querySearch,
+      };
+
+      if (session?.user?.role === "USER") {
+        params.userId = session?.user?.id;
+      }
+
       const res = await axios.get("/api/v1/collection", {
-        params: {
-          page: page,
-          limit: 10,
-          status: getStatusParams,
-          search: querySearch,
-        },
+        params,
       });
 
       setData((prevData) => ({
@@ -95,7 +113,13 @@ export function CollectionPagesComponent() {
       <div>
         <CustomSearch placeholder="Search..." setState={setQuerySearch} />
       </div>
-      <Link href={"/admin/library/collection/addCollection"}>
+      <Link
+        href={
+          session?.user.role == "ADMIN"
+            ? `/admin/library/collection/addCollection`
+            : `/app/library/collection/addCollection`
+        }
+      >
         <div className="border border-black bg-transparent p-3 cursor-pointer hover:bg-black hover:text-white transition-all duration-700">
           Add Collection
         </div>
@@ -116,10 +140,24 @@ export function CollectionPagesComponent() {
                 return;
               }
 
-              router.push(
-                `/admin/library/collection?status=${option.value}`,
-                undefined
-              );
+              if (session?.user?.role === "ADMIN") {
+                router.push(
+                  `/admin/library/collection?status=${option.value}`,
+                  undefined
+                );
+                return;
+              } else {
+                router.push(
+                  `/app/library/collection?status=${option.value}`,
+                  undefined
+                );
+                return;
+              }
+
+              // router.push(
+              //   `/admin/library/collection?status=${option.value}`,
+              //   undefined
+              // );
             }}
           >
             {option.label}
@@ -179,9 +217,17 @@ export function CollectionPagesComponent() {
                           window.location.search
                         );
                         searchParams.set("id", data.id);
-                        router.push(
-                          `/admin/library/collection?${searchParams.toString()}`
-                        );
+
+                        // Berdasarkan Role
+                        if (session?.user?.role === "ADMIN") {
+                          router.push(
+                            `/admin/library/collection?${searchParams.toString()}`
+                          );
+                        } else {
+                          router.push(
+                            `/app/library/collection?${searchParams.toString()}`
+                          );
+                        }
                       }}
                     >
                       Detail
@@ -191,7 +237,13 @@ export function CollectionPagesComponent() {
                       boxShadow="3px 3px"
                       classname="px-2 text-sm"
                       onClick={() => {
-                        setOpenModal(true);
+                        router.push(`${window.location.pathname}/${data.id}`);
+
+                        // window.history.pushState(
+                        //   null,
+                        //   "",
+                        //   window.location.pathname + `/${data.id}`
+                        // );
                       }}
                     >
                       Edit

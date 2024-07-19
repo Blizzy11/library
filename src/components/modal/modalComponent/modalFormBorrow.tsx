@@ -9,17 +9,24 @@ import * as Yup from "yup";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { GetTransactionDetailResponse } from "@/types/transaction";
+import { GetUserProfileResponse } from "@/types/user";
+import { generateAdminApprovalMessage, sendMessage } from "@/helper/helper";
 
 interface ModalFormBorrowProps {
   isOpen: boolean;
   onClose: () => void;
   collectionId: string;
+  dataCollectionApproved?: GetTransactionDetailResponse;
+  dataAdminUserForSendNotification?: GetUserProfileResponse[];
 }
 
 const ModalFormBorrow = ({
   isOpen,
   onClose,
   collectionId,
+  dataCollectionApproved,
+  dataAdminUserForSendNotification,
 }: ModalFormBorrowProps) => {
   // get session
   const isSession = useSession();
@@ -30,8 +37,12 @@ const ModalFormBorrow = ({
   const [isLoading, setIsLoading] = useState(false);
   const [initialValues, setInitialValues] = useState({
     descripiton: "",
-    startDate: dayjs().toISOString(),
-    endDate: dayjs().toISOString(),
+    startDate: dataCollectionApproved?.returnDate
+      ? dataCollectionApproved?.returnDate
+      : dayjs().toISOString(),
+    endDate: dataCollectionApproved?.returnDate
+      ? dataCollectionApproved?.returnDate
+      : dayjs().toISOString(),
   });
 
   // Form Validation
@@ -46,12 +57,35 @@ const ModalFormBorrow = ({
     // Set ulang initialValues Formik
     setInitialValues({
       descripiton: "",
-      startDate: dayjs().toISOString(),
-      endDate: dayjs().toISOString(),
+      startDate: dataCollectionApproved?.returnDate
+        ? dataCollectionApproved?.returnDate
+        : dayjs().toISOString(),
+      endDate: dataCollectionApproved?.returnDate
+        ? dataCollectionApproved?.returnDate
+        : dayjs().toISOString(),
     });
     // Atur key modal untuk memaksa React membuat ulang komponen Modal
     setModalKey((prevKey) => prevKey + 1);
     onClose();
+  };
+
+  // Send message to admin when request approved
+  const handleSendMessage = () => {
+    dataAdminUserForSendNotification?.map((data) => {
+      const dataMessage = generateAdminApprovalMessage({
+        adminName: data.username,
+        userName: session?.user.name || "",
+        collectionTitle: dataCollectionApproved?.item.name || "",
+        borrowDate: dayjs(initialValues.startDate)
+          .format("DD MMMM YYYY")
+          .toString(),
+        returnDate: dayjs(initialValues.endDate)
+          .format("DD MMMM YYYY")
+          .toString(),
+      });
+
+      sendMessage(dataMessage, data.phone?.toString() || "");
+    });
   };
 
   // Handle Submit
@@ -81,12 +115,13 @@ const ModalFormBorrow = ({
           },
         })
         .then((res) => {
-          console.log(res.data);
           toast.success(res.data.message);
+          if (dataAdminUserForSendNotification?.length ?? 0 > 0) {
+            handleSendMessage();
+          }
           handleCloseModal();
         })
         .catch((error) => {
-          console.log(error);
           toast.error(error.response.data.message);
         });
     } catch (error) {
@@ -156,7 +191,11 @@ const ModalFormBorrow = ({
                     <MobileDatePicker
                       defaultValue={dayjs()}
                       value={dayjs(values.startDate)}
-                      minDate={dayjs()}
+                      minDate={
+                        dataCollectionApproved?.returnDate
+                          ? dayjs(dataCollectionApproved?.returnDate)
+                          : dayjs()
+                      }
                       onChange={(date) => {
                         handleChange({
                           target: { name: "startDate", value: date },
@@ -179,7 +218,11 @@ const ModalFormBorrow = ({
                     <MobileDatePicker
                       minDate={dayjs()}
                       name="endDate"
-                      value={dayjs(values.endDate)}
+                      value={
+                        dataCollectionApproved?.returnDate
+                          ? dayjs(dataCollectionApproved?.returnDate)
+                          : dayjs(values.endDate)
+                      }
                       onChange={(date) => {
                         handleChange({
                           target: { name: "endDate", value: date },

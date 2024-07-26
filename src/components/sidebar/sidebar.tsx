@@ -136,7 +136,7 @@ const Sidebar = ({ role }: NavbarProps) => {
                       </details>
                     </li>
                   ) : (
-                    <li>
+                    <li key={item.name}>
                       <Link
                         href={item.link}
                         className="flex items-center text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500"

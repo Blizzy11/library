@@ -116,14 +116,14 @@ const Sidebar = ({ role }: NavbarProps) => {
             {role === "ADMIN"
               ? adminMenu.map((item, index) =>
                   item.submenu ? (
-                    <li>
+                    <li key={item.name}>
                       <details>
                         <summary className=" text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500">
                           <span>{item.name}</span>
                         </summary>
                         <ul className="space-y-2 pl-4">
                           {item.submenu.map((submenu) => (
-                            <li>
+                            <li key={submenu.name}>
                               <Link
                                 href={submenu.link}
                                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"

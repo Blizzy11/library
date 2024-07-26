@@ -36,4 +36,4 @@ jobs:
       - run: npm run build --if-present
       - name: Change Directory
         run: cd /home/era02/actions-runner/_work/library/library
-      - run: pm2 restart 3
+      - run: pm2 restart 2

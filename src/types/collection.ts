@@ -6,6 +6,7 @@ type Pagination = {
 export type CollectionData = {
   id: string;
   name: string;
+  number: string;
   description: string;
   rackId: string;
   categoryId: string;
@@ -49,6 +50,7 @@ export type GetCollectionResponse = {
 export type GetCollectionByIdResponse = {
   id: string;
   name: string;
+  number: string;
   description: string;
   rackId: number;
   categoryId: number;

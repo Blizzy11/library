@@ -1,11 +1,12 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 
 const adminMenu = [
   {
     name: "Dashboard",
-    link: "/admin/dashboard",
+    link: "/admin",
   },
   {
     name: "Transaction",
@@ -52,19 +53,45 @@ const adminMenu = [
 const userMenu = [
   {
     name: "Dashboard",
-    link: "/user/dashboard",
+    link: "/app",
   },
   {
-    name: "Transaction",
-    link: "/user/transaction",
+    name: "Collection List",
+    link: "/app/collection",
+  },
+  {
+    name: "Transaction History",
+    link: "/app/transaction",
+  },
+  {
+    name: "Library",
+    link: "/app/library",
+    submenu: [
+      {
+        name: "My Collection",
+        link: "/app/library/collection",
+      },
+      {
+        name: "My Transaction",
+        link: "/app/library/transaction",
+      },
+      // {
+      //   name: "Rack",
+      //   link: "/app/library/rack",
+      // },
+      // {
+      //   name: "Location",
+      //   link: "/app/library/location",
+      // },
+    ],
   },
   {
     name: "Settings",
-    link: "/user/setting",
+    link: "/app/setting",
     submenu: [
       {
         name: "Profile",
-        link: "/user/setting/profile",
+        link: "/app/setting/profile",
       },
     ],
   },
@@ -85,21 +112,23 @@ const Sidebar = ({ role }: NavbarProps) => {
         aria-label="Sidebar"
       >
         <div className="h-full px-3 pb-4 pt-6 overflow-y-auto bg-white dark:bg-gray-800">
-          <ul className="space-y-2 font-medium">
+          <ul className="space-y-2 font-medium menu rounded-box">
             {role === "ADMIN"
               ? adminMenu.map((item, index) =>
                   item.submenu ? (
-                    <li key={index}>
+                    <li>
                       <details>
-                        <summary>{item.name}</summary>
-                        <ul>
-                          {item.submenu.map((subItem, index) => (
-                            <li key={index}>
+                        <summary className=" text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500">
+                          <span>{item.name}</span>
+                        </summary>
+                        <ul className="space-y-2 pl-4">
+                          {item.submenu.map((submenu) => (
+                            <li>
                               <Link
-                                href={subItem.link}
-                                className="text-gray-700"
+                                href={submenu.link}
+                                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                               >
-                                {subItem.name}
+                                <span>{submenu.name}</span>
                               </Link>
                             </li>
                           ))}
@@ -107,10 +136,10 @@ const Sidebar = ({ role }: NavbarProps) => {
                       </details>
                     </li>
                   ) : (
-                    <li key={item.name}>
+                    <li>
                       <Link
                         href={item.link}
-                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="flex items-center text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500"
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -121,7 +150,7 @@ const Sidebar = ({ role }: NavbarProps) => {
                   item.submenu ? (
                     <li key={item.name}>
                       <details>
-                        <summary>
+                        <summary className=" text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500">
                           <span>{item.name}</span>
                         </summary>
                         <ul className="space-y-2 pl-4">
@@ -142,7 +171,7 @@ const Sidebar = ({ role }: NavbarProps) => {
                     <li key={item.name}>
                       <Link
                         href={item.link}
-                        className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="flex items-center text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500"
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -150,12 +179,14 @@ const Sidebar = ({ role }: NavbarProps) => {
                   )
                 )}
             <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              <div
+                onClick={() => {
+                  signOut();
+                }}
+                className="flex items-center text-gray-900 rounded-lg dark:text-white hover:bg-fuchsia-500 hover:text-white dark:hover:bg-fuchsia-500"
               >
-                <span className="ms-3">Sign Out</span>
-              </a>
+                <span>Sign Out</span>
+              </div>
             </li>
           </ul>
         </div>

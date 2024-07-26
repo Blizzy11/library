@@ -6,8 +6,15 @@ const prisma = new PrismaClient();
 
 // add book
 export async function POST(request: Request) {
-  const { name, description, rackId, categoryId, imageCover, createdBy } =
-    await request.json();
+  const {
+    name,
+    number,
+    description,
+    rackId,
+    categoryId,
+    imageCover,
+    createdBy,
+  } = await request.json();
 
   // Prevent if collection name already exists in rack and location
   const collectionExists = await prisma.item.findFirst({
@@ -31,6 +38,7 @@ export async function POST(request: Request) {
   const book = await prisma.item.create({
     data: {
       name,
+      number,
       description,
       rackId: +rackId,
       categoryId: +categoryId,

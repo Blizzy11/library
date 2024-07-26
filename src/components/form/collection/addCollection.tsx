@@ -31,6 +31,7 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
 
   const [initialValues, setInitialValues] = useState({
     name: data?.name || "",
+    number: data?.number || "",
     description: data?.description || "",
     rackId: data?.rackId || "",
     categoryId: data?.categoryId || "",
@@ -41,6 +42,7 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
     name: Yup.string()
       .required("Collection name is required")
       .min(3, "Too short"),
+    number: Yup.string().required("Collection number is required"),
     description: Yup.string().required("Description is required"),
     rackId: Yup.string().required("Rack is required"),
     categoryId: Yup.string().required("Category is required"),
@@ -83,6 +85,7 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
   const handleSubmit = async (values: any, action: any) => {
     const value: any = {
       name: values.name,
+      number: values.number,
       description: values.description,
       rackId: values.rackId,
       categoryId: values.categoryId,
@@ -186,6 +189,33 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
                 />
                 <ErrorMessage
                   name="name"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="number"
+                className={"block text-sm font-semibold text-black"}
+              >
+                Collection Number
+              </label>
+              <div className={"mt-1"}>
+                <Field
+                  type="text"
+                  name="number"
+                  placeholder="Collection Number"
+                  id="number"
+                  value={values.number}
+                  onChange={handleChange}
+                  autoComplete="off"
+                  className={
+                    "border border-black p-2 w-full rounded-md focus:outline-none focus:border-fuchsia-500"
+                  }
+                />
+                <ErrorMessage
+                  name="number"
                   component="div"
                   className="text-red-500"
                 />

@@ -130,9 +130,12 @@ export default function LandingPageNavbar() {
                 </Link>
               </li>
               <li>
-                <a className="border border-black rounded-none text-black hover:bg-black hover:text-white transition-all ease-in-out duration-300">
+                <Link
+                  href={"/signup"}
+                  className="border border-black rounded-none text-black hover:bg-black hover:text-white transition-all ease-in-out duration-300"
+                >
                   Sign Up <AiOutlineApi />
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -109,7 +109,7 @@ export function CollectionPagesComponent() {
   }, [page]);
 
   return (
-    <div className={`flex flex-col gap-4 max-w-screen-sm`}>
+    <div className={`flex flex-col gap-4 max-w-screen`}>
       <div>
         <CustomSearch placeholder="Search..." setState={setQuerySearch} />
       </div>
@@ -170,10 +170,10 @@ export function CollectionPagesComponent() {
             <span className="loading loading-dots loading-sm"></span>
           </div>
         ) : data && data?.data.length > 0 ? (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {data.data.map((data) => (
               <div
-                className="flex flex-col border p-3 border-black sm:w-full lg:w-[50%] gap-4"
+                className="flex flex-col border p-3 border-black gap-4"
                 key={data.id}
               >
                 <div className="flex flex-row justify-between border-b border-black pb-2">
@@ -199,7 +199,7 @@ export function CollectionPagesComponent() {
                     </p>
                   </div>
                   {data.description ? (
-                    <p className="text-xs text-justify">
+                    <p className="text-xs text-justify py-3">
                       {truncateDescription(data.description, 25)}
                     </p>
                   ) : (

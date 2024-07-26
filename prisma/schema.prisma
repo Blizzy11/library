@@ -69,6 +69,7 @@ model Rack {
 model Item {
   id           String       @id @default(uuid())
   name         String
+  number       String
   description  String?      @db.LongText
   rackId       Int
   categoryId   Int

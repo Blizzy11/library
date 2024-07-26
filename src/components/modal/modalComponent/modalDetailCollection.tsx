@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { GetCollectionResponse } from "@/types/collection";
+import { MdOutlineNumbers } from "react-icons/md";
 import { IoBookSharp, IoLocation } from "react-icons/io5";
 import { BsHddRackFill } from "react-icons/bs";
 import { LuAlarmClock } from "react-icons/lu";
@@ -56,8 +57,6 @@ export default function ModalDetailCollection({
     setIsLoading(true);
   };
 
-  console.log(isLoading);
-
   useEffect(() => {
     const collectionId = params.get("id");
     if (collectionId) {
@@ -77,7 +76,7 @@ export default function ModalDetailCollection({
             <QRCode
               size={256}
               //   style={{ height: "auto", maxWidth: "50%", width: "50%" }}
-              value={data?.data[0].id || "notfound"}
+              value={data?.data[0].number || "notfound"}
               viewBox={`0 0 256 256`}
               className="flex justify-center items-center w-1/4 h-1/4"
             />
@@ -85,6 +84,10 @@ export default function ModalDetailCollection({
           <div className="flex flex-row-reverse gap-3 items-center">
             <IoBookSharp />
             <p className="text-md font-semibold">{data?.data[0].name}</p>
+          </div>
+          <div className="flex flex-row-reverse gap-3 items-center">
+            <MdOutlineNumbers />
+            <p className="text-sm">{data?.data[0].number}</p>
           </div>
           <div className="flex flex-row-reverse gap-3 items-center">
             <IoLocation />

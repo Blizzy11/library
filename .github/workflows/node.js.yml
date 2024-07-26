@@ -1,5 +1,42 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+# name: Node.js CI
+
+# on:
+#   push:
+#     branches: ["master"]
+#   pull_request:
+#     branches: ["master"]
+
+# jobs:
+#   build:
+#     runs-on: self-hosted
+
+#     strategy:
+#       matrix:
+#         node-version: [20.10.0]
+#         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+#     env:
+#       DATABASE_URL: ${{secrets.DATABASE_URL}}
+#       API_URL: ${{secrets.API_URL}}
+#       AUTH_SECRET: ${{secrets.AUTH_SECRET}}
+#       NEXTAUTH_URL: ${{secrets.NEXTAUTH_URL}}
+#       NEXTAUTH_SECRET: ${{secrets.NEXTAUTH_SECRET}}
+#       AUTH_TRUST_HOST: ${{secrets.AUTH_TRUST_HOST}}
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Use Node.js ${{ matrix.node-version }}
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node-version }}
+#           cache: "npm"
+#       - run: npm ci
+#       - run: npm run build --if-present
+#       - name: Change Directory
+#         run: cd /home/era02/actions-runner/_work/library/library
+#       - run: pm2 restart 2
 
 name: Node.js CI
 
@@ -16,14 +53,6 @@ jobs:
     strategy:
       matrix:
         node-version: [20.10.0]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-    env:
-      DATABASE_URL: ${{secrets.DATABASE_URL}}
-      API_URL: ${{secrets.API_URL}}
-      AUTH_SECRET: ${{secrets.AUTH_SECRET}}
-      NEXTAUTH_URL: ${{secrets.NEXTAUTH_URL}}
-      NEXTAUTH_SECRET: ${{secrets.NEXTAUTH_SECRET}}
-      AUTH_TRUST_HOST: ${{secrets.AUTH_TRUST_HOST}}
 
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +63,22 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run build --if-present
-      - name: Change Directory
-        run: cd /home/era02/actions-runner/_work/library/library
-      - run: pm2 restart 2
+      - name: Set Environment Variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "API_URL=${{ secrets.API_URL }}" >> .env
+          echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+          echo "AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}" >> .env
+        working-directory: /home/era02/actions-runner/_work/library/library
+      - name: Restart PM2
+        run: pm2 restart 2
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          API_URL: ${{ secrets.API_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          AUTH_TRUST_HOST: ${{ secrets.AUTH_TRUST_HOST }}
+        working-directory: /home/era02/actions-runner/_work/library/library

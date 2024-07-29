@@ -8,7 +8,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlineContainer } from "react-icons/ai";
 import { toast } from "sonner";
 
@@ -53,54 +53,57 @@ export function TransactionPage() {
   const useParams = useSearchParams();
   const getStatusParams = useParams.get("status");
 
-  const getTransaction = async (reset: boolean = false) => {
-    setIsLoading(true);
-    try {
-      // set params
-      const params: any = {
-        page: page,
-        limit: 10,
-        status: getStatusParams,
-        search: querySearch,
-      };
+  const getTransaction = useCallback(
+    async (reset: boolean = false) => {
+      setIsLoading(true);
+      try {
+        // set params
+        const params: any = {
+          page: page,
+          limit: 10,
+          status: getStatusParams,
+          search: querySearch,
+        };
 
-      if (session && session.user.role === "USER") {
-        params.bookOwnerId = session.user.id;
+        if (session && session.user.role === "USER") {
+          params.bookOwnerId = session.user.id;
+        }
+
+        const res = await axios.get("/api/v1/transaction/borrow", {
+          params,
+        });
+
+        setData((prevData) => ({
+          ...res.data,
+          data: reset
+            ? res.data.data
+            : [...(prevData?.data || []), ...res.data.data],
+        }));
+      } catch (error) {
+        toast.error(
+          (error as any).response?.data?.message || "Something went wrong"
+        );
+      } finally {
+        setIsLoading(false);
       }
-
-      const res = await axios.get("/api/v1/transaction/borrow", {
-        params,
-      });
-
-      setData((prevData) => ({
-        ...res.data,
-        data: reset
-          ? res.data.data
-          : [...(prevData?.data || []), ...res.data.data],
-      }));
-    } catch (error) {
-      toast.error(
-        (error as any).response?.data?.message || "Something went wrong"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [page, getStatusParams, querySearch, session]
+  );
 
   useEffect(() => {
     // Fetch data pertama kali atau ketika `getStatusParams` berubah, reset data
     getTransaction(true);
-  }, [getStatusParams, querySearch]);
+  }, [getStatusParams, querySearch, getTransaction]);
 
   useEffect(() => {
     // Fetch data saat halaman berubah
     if (page > 1) {
       getTransaction();
     }
-  }, [page]);
+  }, [page, getTransaction]);
 
   return (
-    <div className={`flex flex-col gap-4 max-w-screen-sm`}>
+    <div className={`flex flex-col gap-4 max-w-screen`}>
       <div>
         <p>
           <span className="text-xl font-bold">Transaction</span>
@@ -124,8 +127,6 @@ export function TransactionPage() {
                 window.history.replaceState(null, "", window.location.pathname); // Mengembalikan URL ke keadaan semula
                 return;
               }
-
-              console.log(window.location.pathname);
 
               window.history.replaceState(
                 null,

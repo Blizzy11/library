@@ -8,7 +8,7 @@ import { GetAllUserResponse } from "@/types/user";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlineContainer } from "react-icons/ai";
 import { toast } from "sonner";
 import { FaUserCheck, FaUserLargeSlash } from "react-icons/fa6";
@@ -41,49 +41,50 @@ export function UsersPageComponent() {
   const useParams = useSearchParams();
   const getStatusParams = useParams.get("status");
 
-  const getTransaction = async (reset: boolean = false) => {
-    setIsLoading(true);
-    try {
-      const res = await axios.get("/api/v1/user", {
-        params: {
-          page: page,
-          limit: 10,
-          status: getStatusParams,
-          search: querySearch,
-        },
-      });
+  const getTransaction = useCallback(
+    async (reset: boolean = false) => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get("/api/v1/user", {
+          params: {
+            page: page,
+            limit: 10,
+            status: getStatusParams,
+            search: querySearch,
+          },
+        });
 
-      console.log(res.data);
-
-      setData((prevData) => ({
-        ...res.data,
-        data: reset
-          ? res.data.data
-          : [...(prevData?.data || []), ...res.data.data],
-      }));
-    } catch (error) {
-      toast.error(
-        (error as any).response?.data?.message || "Something went wrong"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        setData((prevData) => ({
+          ...res.data,
+          data: reset
+            ? res.data.data
+            : [...(prevData?.data || []), ...res.data.data],
+        }));
+      } catch (error) {
+        toast.error(
+          (error as any).response?.data?.message || "Something went wrong"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [page, getStatusParams, querySearch]
+  );
 
   useEffect(() => {
     // Fetch data pertama kali atau ketika `getStatusParams` berubah, reset data
     getTransaction(true);
-  }, [getStatusParams, querySearch]);
+  }, [getStatusParams, querySearch, getTransaction]);
 
   useEffect(() => {
     // Fetch data saat halaman berubah
     if (page > 1) {
       getTransaction();
     }
-  }, [page]);
+  }, [page, getTransaction]);
 
   return (
-    <div className={`flex flex-col gap-4 max-w-screen-sm`}>
+    <div className={`flex flex-col gap-4 max-w-screen`}>
       <div>
         <CustomSearch
           placeholder="Search name, username, email, phone number"

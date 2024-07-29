@@ -8,7 +8,7 @@ import CustomSelect from "@/components/select/customSelect";
 import { GetLocationResponseArray } from "@/types/location";
 import { GetRackResponseArray } from "@/types/rack";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { toast } from "sonner";
 
@@ -25,7 +25,7 @@ export default function RackPages() {
   const [openModal, setOpenModal] = useState(false);
 
   // getData item
-  const getData = async () => {
+  const getData = useCallback(async () => {
     try {
       await axios
         .get(`/api/v1/rack?page=${page}&limit=10&search=${searchTerm}`)
@@ -40,9 +40,9 @@ export default function RackPages() {
       toast.error("Something went wrong");
     }
     setIsLoading(false);
-  };
+  }, [page, searchTerm]);
 
-  const getDataLocation = async () => {
+  const getDataLocation = useCallback(async () => {
     try {
       await axios
         .get("/api/v1/location")
@@ -56,7 +56,7 @@ export default function RackPages() {
       toast.error("Something went wrong");
     }
     setIsLoading(false);
-  };
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -67,7 +67,7 @@ export default function RackPages() {
   useEffect(() => {
     getData();
     getDataLocation();
-  }, [searchTerm, page]);
+  }, [searchTerm, page, getData, getDataLocation]);
 
   return (
     <div className={"flex flex-col gap-5"}>
@@ -107,7 +107,6 @@ export default function RackPages() {
               </tr>
             ) : data.length > 0 ? (
               data.map((item, index) => {
-                console.log(item);
                 return (
                   <tr key={index} className={`border-b border-black`}>
                     <th>{index + 1}</th>

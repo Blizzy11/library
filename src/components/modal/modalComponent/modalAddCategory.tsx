@@ -98,7 +98,6 @@ export default function ModalAddCategory({
           },
         })
         .then((res) => {
-          console.log(res.data);
           setInitialValues({
             name: res.data.data[0].name,
           });

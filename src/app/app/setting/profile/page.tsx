@@ -11,7 +11,7 @@ const ProfilePage = async () => {
   const isProfile = await getUserProfile();
   if (!isProfile) return <div>Not found</div>;
 
-  return <ProfileUpdate data={isProfile} refetch={getUserProfile} />;
+  return <ProfileUpdate data={isProfile} />;
 };
 
 async function getUserProfile() {

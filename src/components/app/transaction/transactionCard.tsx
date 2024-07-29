@@ -7,7 +7,7 @@ import {
 import axios from "axios";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlineContainer } from "react-icons/ai";
 import { toast } from "sonner";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -34,7 +34,7 @@ const TransactionCard = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenReturn, setIsOpenReturn] = useState(false);
 
-  const getTransaction = async () => {
+  const getTransaction = useCallback(async () => {
     // get transaction
     if (isSession.status !== "authenticated") {
       return toast.error("You are not authenticated");
@@ -68,11 +68,13 @@ const TransactionCard = () => {
     }
 
     setLoading(false);
-  };
+  }, [session?.user.id, page, isSession.status]);
 
   useEffect(() => {
-    getTransaction();
-  }, [page]);
+    if (page > 1 || (page === 1 && data.length === 0)) {
+      getTransaction();
+    }
+  }, [page, getTransaction]);
 
   return (
     <div className={`flex flex-col gap-3 border`}>

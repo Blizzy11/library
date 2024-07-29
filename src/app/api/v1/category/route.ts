@@ -12,8 +12,6 @@ export async function GET(request: Request) {
   const searchTerm = searchParams.get("search") || "";
   const id = searchParams.get("id");
 
-  console.log({ id });
-
   const offset = (pageNumber - 1) * pageSize;
 
   // where condition
@@ -115,8 +113,6 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const { name, id } = await request.json();
   const { searchParams } = new URL(request.url);
-
-  console.log({ name, id });
 
   // check if id exists
   if (!id) {

@@ -48,7 +48,7 @@ async function getCollectionById(id: string) {
 
     return res as GetCollectionByIdResponse;
   } catch (error) {
-    console.log(error);
+    return null;
   }
 }
 

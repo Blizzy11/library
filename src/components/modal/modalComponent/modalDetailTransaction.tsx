@@ -52,7 +52,6 @@ const ModalDetailTransaction = ({
       const { data } = res;
       setData(data.data);
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       handleCloseModal();
     }
@@ -85,7 +84,6 @@ const ModalDetailTransaction = ({
           toast.success(res.data.message);
         })
         .catch((err) => {
-          console.log(err);
           toast.error(err.response.data.message);
         });
     } catch (error) {

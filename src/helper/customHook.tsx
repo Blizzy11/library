@@ -22,7 +22,7 @@ export function useLastTransactionApproved(id: string) {
         );
         setData(res.data);
       } catch (error) {
-        console.log(error);
+        setError(error as any);
       } finally {
         setLoading(false);
       }

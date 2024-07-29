@@ -15,7 +15,6 @@ const CustomModal = ({
   onClose,
   modalTitle,
 }: CustomModalProps) => {
-  console.log(isOpen);
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

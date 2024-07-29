@@ -52,13 +52,13 @@ export function ModalEditLocation({
           });
         })
         .catch((error) => {
-          console.log(error);
+          toast.error(error.response.data.message);
         })
         .finally(() => {
           setDataLoading(false);
         });
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong");
     }
     setDataLoading(false);
   };

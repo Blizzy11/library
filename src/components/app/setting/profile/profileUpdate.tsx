@@ -14,7 +14,7 @@ import * as Yup from "yup";
 
 interface ProfileUpdateProps {
   data: GetUserProfileResponse;
-  refetch: () => void;
+  refetch?: () => void;
 }
 
 export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
@@ -43,7 +43,6 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
 
   const handleSubmitUpdate = async (values: any) => {
     setIsloading(true);
-    console.log(values);
     try {
       await axios
         .put("/api/v1/user", values, {
@@ -53,7 +52,7 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
         })
         .then((res) => {
           toast.success(res.data.message);
-          refetch();
+          // refetch();
         })
         .catch((error) => {
           toast.error(error.response.data.message);
@@ -66,10 +65,6 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
   };
 
   const isValuesChanged = (values: any) => {
-    console.log({
-      values,
-      initialValues,
-    });
     return (
       values.username !== initialValues.username ||
       values.email !== initialValues.email ||
@@ -97,7 +92,9 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
               toast.error("No changes made");
             }
 
-            refetch();
+            if (refetch) {
+              refetch();
+            }
             action.setSubmitting(false);
           }}
         >
@@ -243,7 +240,6 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
                   name="birthDate"
                   value={values.birthDate ? dayjs(values.birthDate) : null}
                   onChange={(date) => {
-                    console.log(date?.format());
                     handleChange({
                       target: {
                         name: "birthDate",

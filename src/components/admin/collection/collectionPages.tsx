@@ -9,7 +9,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IoBookSharp, IoLocation } from "react-icons/io5";
 import { truncateDescription } from "@/helper/helper";
@@ -63,50 +63,51 @@ export function CollectionPagesComponent() {
   const useParams = useSearchParams();
   const getStatusParams = useParams.get("status") ?? "";
 
-  const getTransaction = async (reset: boolean = false) => {
-    setIsLoading(true);
-    try {
-      const params: ParamsGetCollection = {
-        page: page,
-        limit: 10,
-        status: getStatusParams,
-        search: querySearch,
-      };
+  const getTransaction = useCallback(
+    async (reset = false) => {
+      setIsLoading(true);
+      try {
+        const params: ParamsGetCollection = {
+          page: page,
+          limit: 10,
+          status: getStatusParams,
+          search: querySearch,
+        };
 
-      if (session?.user?.role === "USER") {
-        params.userId = session?.user?.id;
+        if (session?.user?.role === "USER") {
+          params.userId = session?.user?.id;
+        }
+
+        const res = await axios.get("/api/v1/collection", { params });
+
+        setData((prevData) => ({
+          ...res.data,
+          data: reset
+            ? res.data.data
+            : [...(prevData?.data || []), ...res.data.data],
+        }));
+      } catch (error) {
+        toast.error(
+          (error as any).response?.data?.message || "Something went wrong"
+        );
+      } finally {
+        setIsLoading(false);
       }
-
-      const res = await axios.get("/api/v1/collection", {
-        params,
-      });
-
-      setData((prevData) => ({
-        ...res.data,
-        data: reset
-          ? res.data.data
-          : [...(prevData?.data || []), ...res.data.data],
-      }));
-    } catch (error) {
-      toast.error(
-        (error as any).response?.data?.message || "Something went wrong"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [page, getStatusParams, querySearch, session?.user?.role, session?.user?.id]
+  );
 
   useEffect(() => {
     // Fetch data pertama kali atau ketika `getStatusParams` berubah, reset data
     getTransaction(true);
-  }, [getStatusParams, querySearch]);
+  }, [getStatusParams, querySearch, getTransaction]);
 
   useEffect(() => {
     // Fetch data saat halaman berubah
     if (page > 1) {
       getTransaction();
     }
-  }, [page]);
+  }, [page, getTransaction]);
 
   return (
     <div className={`flex flex-col gap-4 max-w-screen`}>

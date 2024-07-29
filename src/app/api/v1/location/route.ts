@@ -12,8 +12,6 @@ export async function GET(request: Request) {
   const searchTerm = searchParams.get("search") || "";
   const id = searchParams.get("id");
 
-  console.log({ pageNumber, pageSize, searchTerm, id });
-
   const offset = (pageNumber - 1) * pageSize;
 
   // where condition

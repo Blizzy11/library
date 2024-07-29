@@ -59,7 +59,6 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      console.log(error);
     }
   };
 
@@ -72,7 +71,6 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
       setrack(data.data);
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
       setIsLoading(false);
     }
   };
@@ -111,13 +109,11 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
             },
           })
           .then((res) => {
-            console.log(res.data);
             toast.success(res.data.message);
             // action.resetForm();
             router.refresh();
           })
           .catch((error) => {
-            console.log(error);
             toast.error(error.response.data.message || error.message);
           });
       } else {
@@ -154,7 +150,6 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
         validationSchema={formValidation}
         onSubmit={(values, action) => {
           values.imageCover = (file?.name as any) || null;
-          // console.log(values);
           handleSubmit(values, action);
         }}
       >
@@ -334,7 +329,6 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
                   type="file"
                   className="file-input file-input-md w-full border border-black"
                   onChange={(e: any) => {
-                    console.log(e.target.files[0]);
                     setFile(e.target.files[0]);
                   }}
                   accept="image/*"

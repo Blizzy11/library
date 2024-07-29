@@ -36,7 +36,7 @@ const ModalReturnFormCollection = ({
           toast.error(error.response.data.message || error.message);
         });
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong");
     }
   };
 

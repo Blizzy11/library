@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
@@ -124,7 +125,15 @@ const Navbar = ({ role }: NavbarProps) => {
                 <IoCloseSharp size={28} />
               )}
             </div>
-            <h1 className="text-3xl font-bold border border-black p-2">Logo</h1>
+            <div>
+              <Image
+                src="/icon/logo.png"
+                alt="logo"
+                width={65}
+                height={65}
+                className="cursor-pointer object-contain"
+              />
+            </div>
           </div>
           <div>
             <button>

@@ -12,7 +12,7 @@ import { GetLocationResponseArray } from "@/types/location";
 import { GetRackResponseArray } from "@/types/rack";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { toast } from "sonner";
 
@@ -29,7 +29,7 @@ export default function CategoryPage() {
   const [selectedId, setSelectedId] = useState(0);
 
   // getData item
-  const getData = async () => {
+  const getData = useCallback(async () => {
     setIsLoading(true);
     try {
       await axios
@@ -45,7 +45,7 @@ export default function CategoryPage() {
       toast.error("Something went wrong");
     }
     setIsLoading(false);
-  };
+  }, [page, searchTerm]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -55,7 +55,7 @@ export default function CategoryPage() {
   // useEffect
   useEffect(() => {
     getData();
-  }, [searchTerm, page]);
+  }, [getData]);
 
   return (
     <div className={"flex flex-col gap-5"}>

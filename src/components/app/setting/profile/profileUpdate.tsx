@@ -24,7 +24,7 @@ export default function ProfileUpdate({ data, refetch }: ProfileUpdateProps) {
     email: data.email || "",
     name: data.name || "",
     phone_number: data.phone || "",
-    birthDate: data.birthDate ? dayjs(data.birthDate).format() : "", // Format as string
+    birthDate: data.birthDate ? dayjs(data.birthDate).format() : null, // Format as string
   });
 
   const phoneRegExp =

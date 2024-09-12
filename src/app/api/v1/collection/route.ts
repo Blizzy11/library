@@ -10,7 +10,8 @@ export async function POST(request: Request) {
     name,
     number,
     description,
-    rackId,
+    rack_name,
+    locationId,
     categoryId,
     imageCover,
     createdBy,
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
   const collectionExists = await prisma.item.findFirst({
     where: {
       name,
-      rackId: +rackId,
+      rack_name: rack_name,
     },
   });
   if (collectionExists) {
@@ -40,7 +41,8 @@ export async function POST(request: Request) {
       name,
       number,
       description,
-      rackId: +rackId,
+      rack_name: rack_name,
+      locationId: +locationId,
       categoryId: +categoryId,
       imageCover,
       createdBy,
@@ -73,8 +75,15 @@ export async function POST(request: Request) {
 
 // Update collection
 export async function PUT(request: Request) {
-  const { name, description, rackId, categoryId, imageCover, updatedBy } =
-    await request.json();
+  const {
+    name,
+    description,
+    rack_name,
+    locatioinId,
+    categoryId,
+    imageCover,
+    updatedBy,
+  } = await request.json();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const book = await prisma.item.update({
@@ -84,7 +93,8 @@ export async function PUT(request: Request) {
     data: {
       name,
       description,
-      rackId: +rackId,
+      rack_name: rack_name,
+      locationId: +locatioinId,
       categoryId: +categoryId,
       imageCover,
       updatedBy,
@@ -178,11 +188,7 @@ export async function GET(request: Request) {
     take: pageSize,
     where: whereClause,
     include: {
-      rack: {
-        include: {
-          location: true,
-        },
-      },
+      location: true,
       category: true,
     },
     orderBy: {

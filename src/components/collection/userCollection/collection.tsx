@@ -103,11 +103,11 @@ const Collection = () => {
                 <div className="flex flex-col">
                   <p className="text-xs flex gap-2 items-center">
                     <IoLocation />
-                    {item.rack.location.name}
+                    {item.location.name}
                   </p>
                   <p className="text-xs flex gap-2 items-center">
                     <BsHddRackFill />
-                    {item.rack.name}
+                    {item.rack_name}
                   </p>
                   <p className="text-xs flex gap-2 items-center">
                     <FaEye />

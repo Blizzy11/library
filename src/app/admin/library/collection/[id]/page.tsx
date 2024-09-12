@@ -37,11 +37,7 @@ async function getCollectionById(id: string) {
         id: id,
       },
       include: {
-        rack: {
-          include: {
-            location: true,
-          },
-        },
+        location: true,
         category: true,
       },
     });

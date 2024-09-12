@@ -192,11 +192,11 @@ export function CollectionPagesComponent() {
                   <div className="flex flex-col">
                     <p className="text-xs flex gap-2 items-center">
                       <IoLocation />
-                      {data.rack.location.name}
+                      {data.rack_name}
                     </p>
                     <p className="text-xs flex gap-2 items-center">
                       <BsHddRackFill />
-                      {data.rack.name}
+                      {data.location.name}
                     </p>
                   </div>
                   {data.description ? (

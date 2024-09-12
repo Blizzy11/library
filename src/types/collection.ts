@@ -8,7 +8,8 @@ export type CollectionData = {
   name: string;
   number: string;
   description: string;
-  rackId: string;
+  rack_name: string;
+  locationId: number;
   categoryId: string;
   imageCover: null;
   is_active: true;
@@ -16,19 +17,10 @@ export type CollectionData = {
   availability: string;
   createdAt: string | Date;
   updatedAt: string | Date;
-  rack: {
-    id: string;
+  location: {
+    id: number;
     name: string;
-    description: string;
     is_active: boolean;
-    locationId: number;
-    location: {
-      id: number;
-      name: string;
-      is_active: boolean;
-      createdAt: string;
-      updatedAt: string;
-    };
     createdAt: string;
     updatedAt: string;
   };
@@ -52,7 +44,8 @@ export type GetCollectionByIdResponse = {
   name: string;
   number: string;
   description: string;
-  rackId: number;
+  rack_name: string;
+  locationId: number;
   categoryId: number;
   imageCover: string | null;
   is_active: boolean;
@@ -60,21 +53,12 @@ export type GetCollectionByIdResponse = {
   availability: string;
   createdAt: string | Date;
   updatedAt: string | Date;
-  rack: {
+  location: {
     id: number;
     name: string;
-    description: string;
     is_active: boolean;
-    locationId: number;
     createdAt: string | Date;
     updatedAt: string | Date;
-    location: {
-      id: number;
-      name: string;
-      is_active: boolean;
-      createdAt: string | Date;
-      updatedAt: string | Date;
-    };
   };
   category: {
     id: number;

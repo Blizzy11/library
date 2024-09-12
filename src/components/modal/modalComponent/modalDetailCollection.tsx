@@ -91,11 +91,11 @@ export default function ModalDetailCollection({
           </div>
           <div className="flex flex-row-reverse gap-3 items-center">
             <IoLocation />
-            <p className="text-sm">{data?.data[0].rack.location.name}</p>
+            <p className="text-sm">{data?.data[0].location.name}</p>
           </div>
           <div className="flex flex-row-reverse gap-3 items-center">
             <BsHddRackFill />
-            <p className="text-sm ">{data?.data[0].rack.name}</p>
+            <p className="text-sm ">{data?.data[0].rack_name}</p>
           </div>
           <div className="flex flex-row-reverse gap-3 items-center">
             <LuAlarmClock />

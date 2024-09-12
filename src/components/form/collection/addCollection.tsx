@@ -24,7 +24,7 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
 
   const [file, setFile] = useState<File | null>(null);
   const [category, setcategory] = useState<GetCategoryResponseArray>([]);
-  const [rack, setrack] = useState<GetRackResponseArray>([]);
+  const [location, setLocation] = useState<GetRackResponseArray>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
@@ -33,7 +33,8 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
     name: data?.name || "",
     number: data?.number || "",
     description: data?.description || "",
-    rackId: data?.rackId || "",
+    rack_name: data?.rack_name || "",
+    locationId: data?.locationId || "",
     categoryId: data?.categoryId || "",
     imageCover: "",
   });
@@ -44,7 +45,8 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
       .min(3, "Too short"),
     number: Yup.string().required("Collection number is required"),
     description: Yup.string().required("Description is required"),
-    rackId: Yup.string().required("Rack is required"),
+    rack_name: Yup.string().required("Rack is required"),
+    locationId: Yup.string().required("Rack is required"),
     categoryId: Yup.string().required("Category is required"),
     // imageCover: Yup.mixed().required("Image is required"),
   });
@@ -63,12 +65,12 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
   };
 
   // get rack
-  const getRack = async () => {
+  const getLocatioin = async () => {
     setIsLoading(true);
     try {
-      const res = axios.get("/api/v1/rack");
+      const res = axios.get("/api/v1/location");
       const { data } = await res;
-      setrack(data.data);
+      setLocation(data.data);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
@@ -77,15 +79,17 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
 
   useEffect(() => {
     getCategory();
-    getRack();
+    getLocatioin();
   }, []);
 
   const handleSubmit = async (values: any, action: any) => {
+    console.log("values", values);
     const value: any = {
       name: values.name,
       number: values.number,
       description: values.description,
-      rackId: values.rackId,
+      rack_name: values.rack_name,
+      locationId: values.locationId,
       categoryId: values.categoryId,
       imageCover: values.imageCover,
     };
@@ -124,11 +128,13 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
             },
           })
           .then((res) => {
+            console.log(res);
             toast.success(res.data.message);
             action.resetForm();
             // router.refresh();
           })
           .catch((error) => {
+            console.log(error);
             toast.error(error.response.data.message || error.message);
           });
       }
@@ -218,6 +224,33 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
             </div>
             <div>
               <label
+                htmlFor="rack_name"
+                className={"block text-sm font-semibold text-black"}
+              >
+                Rack Name
+              </label>
+              <div className={"mt-1"}>
+                <Field
+                  type="text"
+                  name="rack_name"
+                  placeholder="Enter Rack Name"
+                  id="rack_name"
+                  value={values.rack_name}
+                  onChange={handleChange}
+                  autoComplete="off"
+                  className={
+                    "border border-black p-2 w-full rounded-md focus:outline-none focus:border-fuchsia-500"
+                  }
+                />
+                <ErrorMessage
+                  name="rack_name"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label
                 htmlFor="name"
                 className={"block text-sm font-semibold text-black"}
               >
@@ -246,34 +279,34 @@ const CollectionForm = ({ data }: CollectionFormProps) => {
             </div>
             <div>
               <label
-                htmlFor="name"
+                htmlFor="locationId"
                 className={"block text-sm font-semibold text-black"}
               >
-                Rack
+                Location
               </label>
               <div className={"mt-1"}>
                 <Field
                   as="select"
-                  name="rackId"
+                  name="locationId"
                   className="select border border-black bordered w-full"
-                  value={values.rackId}
+                  value={values.locationId}
                   onChange={handleChange}
                 >
                   <option value={""} className="text-white">
-                    Select Rack
+                    Select Location
                   </option>
-                  {rack?.map((item) => (
+                  {location?.map((item) => (
                     <option
                       key={item.id}
                       value={item.id}
                       className="text-white"
                     >
-                      {`${item.name} - ${item.location.name}`}
+                      {`${item.name}`}
                     </option>
                   ))}
                 </Field>
                 <ErrorMessage
-                  name="rackId"
+                  name="locationId"
                   component="div"
                   className="text-red-500"
                 />

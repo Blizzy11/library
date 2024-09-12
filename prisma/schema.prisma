@@ -54,24 +54,13 @@ model Role {
   // Admin     Admin[]
 }
 
-model Rack {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  is_active   Boolean  @default(true)
-  locationId  Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  location    Location @relation(fields: [locationId], references: [id])
-  Item        Item[]
-}
-
 model Item {
   id           String       @id @default(uuid())
   name         String
   number       String
   description  String?      @db.LongText
-  rackId       Int
+  rack_name    String
+  locationId   Int
   categoryId   Int
   imageCover   String?
   is_active    Boolean      @default(true)
@@ -81,8 +70,8 @@ model Item {
   createdAt    DateTime     @default(now())
   updatedBy    String?
   updatedAt    DateTime     @updatedAt
-  rack         Rack         @relation(fields: [rackId], references: [id])
   category     Category     @relation(fields: [categoryId], references: [id])
+  location     Location     @relation(fields: [locationId], references: [id])
   Borrow       Borrow[]
   ItemImage    Item_Image[]
   LostItem     Lost_Item[]
@@ -170,7 +159,7 @@ model Location {
   is_active Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Rack      Rack[]
+  Item      Item[]
 }
 
 model User_Activity {

@@ -32,10 +32,10 @@ const adminMenu = [
         name: "Category",
         link: "/admin/library/category",
       },
-      {
-        name: "Rack",
-        link: "/admin/library/rack",
-      },
+      // {
+      //   name: "Rack",
+      //   link: "/admin/library/rack",
+      // },
       {
         name: "Location",
         link: "/admin/library/location",

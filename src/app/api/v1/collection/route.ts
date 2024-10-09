@@ -74,135 +74,90 @@ export async function POST(request: Request) {
 }
 
 // Update collection
-export async function PUT(request: Request) {
-  const {
-    name,
-    description,
-    rack_name,
-    locatioinId,
-    categoryId,
-    imageCover,
-    updatedBy,
-  } = await request.json();
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  const book = await prisma.item.update({
-    where: {
-      id: id as string,
-    },
-    data: {
-      name,
-      description,
-      rack_name: rack_name,
-      locationId: +locatioinId,
-      categoryId: +categoryId,
-      imageCover,
-      updatedBy,
-    },
-  });
-
-  if (book) {
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Book updated successfully",
-        data: book,
-      },
-      {
-        status: 200,
-      }
-    );
-  } else {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Book not updated",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId");
+  const itemId = searchParams.get("itemId");
   const pageNumber = parseInt(searchParams.get("page") || "1");
   const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
-  const id = searchParams.get("id");
   const status = searchParams.get("status") || "";
 
-  // If have user id then filter by user
-  const userId = searchParams.get("userId");
+  // if role user
+  const creatorId = searchParams.get("creatorId");
 
   const offset = (pageNumber - 1) * pageSize;
 
-  // where condition
   let whereClause: Record<string, any> = {};
-
-  if (searchTerm) {
-    whereClause.OR = [
-      { name: { contains: searchTerm } },
-      { description: { contains: searchTerm } },
-      {
-        rack: {
-          name: {
-            contains: searchTerm,
-          },
-        },
-      },
-      {
-        category: {
-          name: {
-            contains: searchTerm,
-          },
-        },
-      },
-    ];
-  }
-
-  if (id) {
-    whereClause = {
-      ...whereClause,
-      id: id,
-    };
-  }
 
   if (userId) {
     whereClause = {
       ...whereClause,
-      createdBy: userId,
+      userId,
+    };
+  }
+
+  if (itemId) {
+    whereClause = {
+      ...whereClause,
+      id: itemId,
     };
   }
 
   if (status && status !== "ALL") {
     whereClause = {
       ...whereClause,
-      availability: status,
+      status,
     };
   }
 
-  const booksQuery = await prisma.item.findMany({
+  if (creatorId) {
+    whereClause = {
+      ...whereClause,
+      createdBy: creatorId,
+    };
+  }
+
+  if (searchTerm) {
+    whereClause = {
+      ...whereClause,
+      OR: [
+        { name: { contains: searchTerm } },
+        { description: { contains: searchTerm } },
+        {
+          category: {
+            name: {
+              contains: searchTerm,
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  // Fetch paginated list of items (collections)
+  const collections = await prisma.item.findMany({
     skip: offset,
     take: pageSize,
     where: whereClause,
-    include: {
-      location: true,
-      category: true,
-    },
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+      category: true,
+      location: true,
+      // Include user if needed
+    },
   });
 
+  // Pagination: total count and total pages
   const totalData = await prisma.item.count({ where: whereClause });
   const totalPage = Math.ceil(totalData / pageSize);
   const isPagination = pagination(totalData, totalPage);
 
   return NextResponse.json({
-    message: "Books fetched successfully",
-    data: booksQuery,
+    message: "Items fetched successfully",
+    data: collections,
     pagination: isPagination,
   });
 }

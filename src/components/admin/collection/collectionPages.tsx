@@ -71,15 +71,18 @@ export function CollectionPagesComponent() {
           page: page,
           limit: 10,
           status: getStatusParams,
-          search: querySearch,
+          search: querySearch ? querySearch : undefined, // Set undefined if empty
         };
+
+        console.log("Query search:", querySearch);
+        console.log("Params:", params);
 
         if (session?.user?.role === "USER") {
           params.userId = session?.user?.id;
         }
 
         const res = await axios.get("/api/v1/collection", { params });
-
+        console.log(res.data);
         setData((prevData) => ({
           ...res.data,
           data: reset
@@ -98,16 +101,12 @@ export function CollectionPagesComponent() {
   );
 
   useEffect(() => {
-    // Fetch data pertama kali atau ketika `getStatusParams` berubah, reset data
-    getTransaction(true);
-  }, [getStatusParams, querySearch, getTransaction]);
-
-  useEffect(() => {
-    // Fetch data saat halaman berubah
-    if (page > 1) {
-      getTransaction();
+    if (querySearch === "") {
+      getTransaction(true);
+    } else {
+      getTransaction(true); // Tetap panggil getTransaction untuk mencari data yang sesuai dengan query
     }
-  }, [page, getTransaction]);
+  }, [querySearch, getTransaction]);
 
   return (
     <div className={`flex flex-col gap-4 max-w-screen`}>

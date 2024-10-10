@@ -78,18 +78,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
   const itemId = searchParams.get("itemId");
-  const pageNumber = parseInt(searchParams.get("page") || "1");
-  const pageSize = parseInt(searchParams.get("limit") || "10");
   const searchTerm = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
 
-  // if role user
-  const creatorId = searchParams.get("creatorId");
-
-  const offset = (pageNumber - 1) * pageSize;
-
   let whereClause: Record<string, any> = {};
 
+  // Filter by userId if provided
   if (userId) {
     whereClause = {
       ...whereClause,
@@ -97,6 +91,7 @@ export async function GET(request: Request) {
     };
   }
 
+  // Filter by itemId if provided
   if (itemId) {
     whereClause = {
       ...whereClause,
@@ -104,20 +99,22 @@ export async function GET(request: Request) {
     };
   }
 
+  // Filter by status if provided and it's not "ALL"
   if (status && status !== "ALL") {
-    whereClause = {
-      ...whereClause,
-      status,
-    };
+    if (["AVAILABLE", "BORROWED", "MAINTENANCE", "LOST"].includes(status)) {
+      whereClause = {
+        ...whereClause,
+        availability: status, // Assuming "availability" is the field for status
+      };
+    } else {
+      return NextResponse.json({
+        message: "Invalid status",
+        data: [],
+      });
+    }
   }
 
-  if (creatorId) {
-    whereClause = {
-      ...whereClause,
-      createdBy: creatorId,
-    };
-  }
-
+  // Add search functionality
   if (searchTerm) {
     whereClause = {
       ...whereClause,
@@ -135,29 +132,38 @@ export async function GET(request: Request) {
     };
   }
 
-  // Fetch paginated list of items (collections)
-  const collections = await prisma.item.findMany({
-    skip: offset,
-    take: pageSize,
-    where: whereClause,
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      category: true,
-      location: true,
-      // Include user if needed
-    },
-  });
+  try {
+    // Fetch items based on the filters without pagination
+    const collections = await prisma.item.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        category: true,
+        location: true,
+      },
+    });
 
-  // Pagination: total count and total pages
-  const totalData = await prisma.item.count({ where: whereClause });
-  const totalPage = Math.ceil(totalData / pageSize);
-  const isPagination = pagination(totalData, totalPage);
+    if (collections.length === 0) {
+      return NextResponse.json({
+        message: "No data",
+        data: [],
+      });
+    }
 
-  return NextResponse.json({
-    message: "Items fetched successfully",
-    data: collections,
-    pagination: isPagination,
-  });
+    return NextResponse.json({
+      message: "Items fetched successfully",
+      data: collections,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      {
+        message: "Internal server error",
+        error: "Something went wrong",
+      },
+      { status: 500 }
+    );
+  }
 }

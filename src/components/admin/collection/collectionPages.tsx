@@ -4,19 +4,16 @@ import CustomButton from "@/components/button/customButton";
 import ModalDetailTransaction from "@/components/modal/modalComponent/modalDetailTransaction";
 import CustomSearch from "@/components/search/customSearch";
 import { GetCollectionResponse } from "@/types/collection";
-import { GetTransactionResponse } from "@/types/transaction";
 import axios from "axios";
-import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IoBookSharp, IoLocation } from "react-icons/io5";
 import { truncateDescription } from "@/helper/helper";
-import { AiOutlinePartition } from "react-icons/ai";
-import ModalDetailCollection from "@/components/modal/modalComponent/modalDetailCollection";
 import { BsHddRackFill } from "react-icons/bs";
 import { useSession } from "next-auth/react";
+import ModalDetailCollection from "@/components/modal/modalComponent/modalDetailCollection";
 
 const selectOptions = [
   {
@@ -41,14 +38,6 @@ const selectOptions = [
   },
 ];
 
-type ParamsGetCollection = {
-  page: number;
-  limit: number;
-  status?: string;
-  search?: string;
-  userId?: string;
-};
-
 export function CollectionPagesComponent() {
   // Get session
   const { data: session } = useSession();
@@ -56,68 +45,49 @@ export function CollectionPagesComponent() {
   const router = useRouter();
   const [data, setData] = useState<GetCollectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [querySearch, setQuerySearch] = useState<string>("");
 
   const useParams = useSearchParams();
   const getStatusParams = useParams.get("status") ?? "";
 
-  const getTransaction = useCallback(
-    async (reset = false) => {
-      setIsLoading(true);
-      try {
-        const params: ParamsGetCollection = {
-          page: page,
-          limit: 10,
-          status: getStatusParams,
-          search: querySearch ? querySearch : undefined, // Set undefined if empty
-        };
+  const getTransaction = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params: Record<string, string | undefined> = {
+        status: getStatusParams,
+        search: querySearch ? querySearch : undefined,
+      };
 
-        console.log("Query search:", querySearch);
-        console.log("Params:", params);
-
-        if (session?.user?.role === "USER") {
-          params.userId = session?.user?.id;
-        }
-
-        const res = await axios.get("/api/v1/collection", { params });
-        console.log(res.data);
-        setData((prevData) => ({
-          ...res.data,
-          data: reset
-            ? res.data.data
-            : [...(prevData?.data || []), ...res.data.data],
-        }));
-      } catch (error) {
-        toast.error(
-          (error as any).response?.data?.message || "Something went wrong"
-        );
-      } finally {
-        setIsLoading(false);
+      if (session?.user?.role === "USER") {
+        params.userId = session?.user?.id;
       }
-    },
-    [page, getStatusParams, querySearch, session?.user?.role, session?.user?.id]
-  );
+
+      const res = await axios.get("/api/v1/collection", { params });
+      setData(res.data);
+    } catch (error) {
+      toast.error(
+        (error as any).response?.data?.message || "Something went wrong"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getStatusParams, querySearch, session?.user?.role, session?.user?.id]);
 
   useEffect(() => {
-    if (querySearch === "") {
-      getTransaction(true);
-    } else {
-      getTransaction(true); // Tetap panggil getTransaction untuk mencari data yang sesuai dengan query
-    }
+    getTransaction();
   }, [querySearch, getTransaction]);
 
   return (
-    <div className={`flex flex-col gap-4 max-w-screen`}>
+    <div className="flex flex-col gap-4 max-w-screen">
       <div>
         <CustomSearch placeholder="Search..." setState={setQuerySearch} />
       </div>
       <Link
         href={
           session?.user.role == "ADMIN"
-            ? `/admin/library/collection/addCollection`
-            : `/app/library/collection/addCollection`
+            ? "/admin/library/collection/addCollection"
+            : "/app/library/collection/addCollection"
         }
       >
         <div className="border border-black bg-transparent p-3 cursor-pointer hover:bg-black hover:text-white transition-all duration-700">
@@ -136,28 +106,15 @@ export function CollectionPagesComponent() {
             }`}
             onClick={() => {
               if (option.value === "ALL") {
-                window.history.replaceState(null, "", window.location.pathname); // Mengembalikan URL ke keadaan semula
+                window.history.replaceState(null, "", window.location.pathname);
                 return;
               }
 
               if (session?.user?.role === "ADMIN") {
-                router.push(
-                  `/admin/library/collection?status=${option.value}`,
-                  undefined
-                );
-                return;
+                router.push(`/admin/library/collection?status=${option.value}`);
               } else {
-                router.push(
-                  `/app/library/collection?status=${option.value}`,
-                  undefined
-                );
-                return;
+                router.push(`/app/library/collection?status=${option.value}`);
               }
-
-              // router.push(
-              //   `/admin/library/collection?status=${option.value}`,
-              //   undefined
-              // );
             }}
           >
             {option.label}
@@ -165,25 +122,25 @@ export function CollectionPagesComponent() {
         ))}
       </div>
       <div className="">
-        {isLoading && page === 1 ? (
+        {isLoading ? (
           <div className="flex justify-center">
             <span className="loading loading-dots loading-sm"></span>
           </div>
         ) : data && data?.data.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {data.data.map((data) => (
+            {data.data.map((item) => (
               <div
                 className="flex flex-col border p-3 border-black gap-4"
-                key={data.id}
+                key={item.id}
               >
                 <div className="flex flex-row justify-between border-b border-black pb-2">
                   <div className="flex gap-3 items-center">
                     <IoBookSharp />
-                    <span className="capitalize text-sm">{data.name}</span>
+                    <span className="capitalize text-sm">{item.name}</span>
                   </div>
                   <div>
                     <span className="capitalize text-xs border border-black p-1">
-                      {data.availability}
+                      {item.availability}
                     </span>
                   </div>
                 </div>
@@ -191,16 +148,16 @@ export function CollectionPagesComponent() {
                   <div className="flex flex-col">
                     <p className="text-xs flex gap-2 items-center">
                       <IoLocation />
-                      {data.rack_name}
+                      {item.rack_name}
                     </p>
                     <p className="text-xs flex gap-2 items-center">
                       <BsHddRackFill />
-                      {data.location.name}
+                      {item.location.name}
                     </p>
                   </div>
-                  {data.description ? (
+                  {item.description ? (
                     <p className="text-xs text-justify py-3">
-                      {truncateDescription(data.description, 25)}
+                      {truncateDescription(item.description, 25)}
                     </p>
                   ) : (
                     <p className="text-xs">No description</p>
@@ -212,13 +169,10 @@ export function CollectionPagesComponent() {
                       classname="px-2 py-1 text-sm"
                       onClick={() => {
                         setOpenModal(true);
-
                         const searchParams = new URLSearchParams(
                           window.location.search
                         );
-                        searchParams.set("id", data.id);
-
-                        // Berdasarkan Role
+                        searchParams.set("id", item.id);
                         if (session?.user?.role === "ADMIN") {
                           router.push(
                             `/admin/library/collection?${searchParams.toString()}`
@@ -237,13 +191,7 @@ export function CollectionPagesComponent() {
                       boxShadow="3px 3px"
                       classname="px-2 text-sm"
                       onClick={() => {
-                        router.push(`${window.location.pathname}/${data.id}`);
-
-                        // window.history.pushState(
-                        //   null,
-                        //   "",
-                        //   window.location.pathname + `/${data.id}`
-                        // );
+                        router.push(`${window.location.pathname}/${item.id}`);
                       }}
                     >
                       Edit
@@ -257,23 +205,6 @@ export function CollectionPagesComponent() {
           <div className="text-center">No data</div>
         )}
       </div>
-      {isLoading && page > 1 && (
-        <div className="flex justify-center">
-          <span className="loading loading-dots loading-sm"></span>
-        </div>
-      )}
-      {page < (data?.pagination.totalPage ?? 0) && (
-        <div className="self-center">
-          <CustomButton
-            type="button"
-            classname="px-3 py-1"
-            onClick={() => setPage(page + 1)}
-          >
-            Load More
-          </CustomButton>
-        </div>
-      )}
-
       <ModalDetailCollection
         isOpen={openModal}
         onClose={() => {
